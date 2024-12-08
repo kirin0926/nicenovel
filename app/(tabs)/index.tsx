@@ -1,74 +1,115 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { useState } from 'react';
+import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, Dimensions } from 'react-native';
+import { router } from 'expo-router';
+import { FontAwesome } from '@expo/vector-icons';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+const { width } = Dimensions.get('window');
+const COLUMN_WIDTH = (width - 32) / 2;
 
-export default function HomeScreen() {
+interface Novel {
+  id: string;
+  title: string;
+  author: string;
+  cover: string;
+  likes: number;
+}
+
+export default function Home() {
+  const [novels] = useState<Novel[]>([
+    {
+      id: '1',
+      title: '仙逆',
+      author: '耳根',
+      cover: 'https://picsum.photos/200/300',
+      likes: 1234,
+    },
+    {
+      id: '2',
+      title: '凡人修仙传',
+      author: '忘语',
+      cover: 'https://picsum.photos/200/300',
+      likes: 5678,
+    },
+    // Add more sample novels as needed
+  ]);
+
+  const renderNovelItem = ({ item }: { item: Novel }) => (
+    <TouchableOpacity
+      style={styles.novelCard}
+      onPress={() => router.push({
+        pathname: '/novel',
+        params: { id: item.id }
+      })}>
+      <Image source={{ uri: item.cover }} style={styles.coverImage} />
+      <View style={styles.novelInfo}>
+        <Text style={styles.title} numberOfLines={1}>{item.title}</Text>
+        <Text style={styles.author} numberOfLines={1}>{item.author}</Text>
+        <View style={styles.likesContainer}>
+          <FontAwesome name="heart" size={12} color="#FF6B6B" />
+          <Text style={styles.likes}>{item.likes}</Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <View style={styles.container}>
+      <FlatList
+        data={novels}
+        renderItem={renderNovelItem}
+        keyExtractor={(item) => item.id}
+        numColumns={2}
+        columnWrapperStyle={styles.row}
+        contentContainerStyle={styles.list}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  list: {
+    padding: 8,
+  },
+  row: {
+    justifyContent: 'space-between',
+  },
+  novelCard: {
+    width: COLUMN_WIDTH,
+    backgroundColor: 'white',
+    borderRadius: 8,
+    marginBottom: 16,
+    elevation: 2,
+  },
+  coverImage: {
+    width: COLUMN_WIDTH,
+    height: COLUMN_WIDTH * 1.5,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+  },
+  novelInfo: {
+    padding: 8,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  author: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+  },
+  likesContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  likes: {
+    fontSize: 12,
+    color: '#666',
+    marginLeft: 4,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
+}); 
