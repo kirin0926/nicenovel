@@ -1,16 +1,11 @@
 import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
+import { useUser } from '@/lib/UserContext';
 
 export default function Profile() {
-  const isLoggedIn = false;
-  
-  const user = {
-    id: '12345678',
-    nickname: '书友123456',
-    avatar: 'https://picsum.photos/200',
-    isVip: false,
-  };
+  const { user } = useUser();
+  const isLoggedIn = !!user;
 
   if (!isLoggedIn) {
     return (
@@ -26,16 +21,23 @@ export default function Profile() {
     );
   }
 
+  const userData = {
+    id: user.id,
+    nickname: user.user_metadata?.full_name || '用户' + user.id.slice(0, 6),
+    avatar: user.user_metadata?.avatar_url || 'https://picsum.photos/200',
+    isVip: user.user_metadata?.isVip || false,
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Image source={{ uri: user.avatar }} style={styles.avatar} />
+        <Image source={{ uri: userData.avatar }} style={styles.avatar} />
         <View style={styles.userInfo}>
-          <Text style={styles.nickname}>{user.nickname}</Text>
-          <Text style={styles.userId}>ID: {user.id}</Text>
+          <Text style={styles.nickname}>{userData.nickname}</Text>
+          <Text style={styles.userId}>ID: {userData.id}</Text>
           <View style={styles.vipBadge}>
-            <Text style={[styles.vipText, !user.isVip && styles.nonVipText]}>
-              {user.isVip ? 'VIP会员' : '普通用户'}
+            <Text style={[styles.vipText, !userData.isVip && styles.nonVipText]}>
+              {userData.isVip ? 'VIP会员' : '普通用户'}
             </Text>
           </View>
         </View>
