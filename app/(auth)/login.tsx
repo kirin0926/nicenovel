@@ -18,8 +18,9 @@ import { FontAwesome } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
 import { useEffect } from 'react';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '@/lib/supabase';
 // import { makeRedirectUri } from 'expo-auth-session';
+// import * as AppleAuthentication from 'expo-auth-session/providers/apple';
 
 // 确保在web浏览器完成身份验证后正确关闭
 WebBrowser.maybeCompleteAuthSession();
@@ -41,12 +42,32 @@ export default function Login() {
   useEffect(() => {
     if (response?.type === 'success') {
       const { authentication } = response;
-      const token = authentication?.accessToken;
+      const token = authentication?.idToken as string;
       console.log('response', response);
       console.log('token', token);
-      // handleGoogleSignIn(token);
+      signInWithSupabase(token);
     }
   }, [response]);
+
+  // 使用 Supabase 进行 Google 登录
+  const signInWithSupabase = async (token: string) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithIdToken({
+        provider: 'google',
+        token: token,
+      });
+      if (error) {
+        console.error('Error signing in with Google:', error);
+        return;
+      }
+      if (data.user) {
+        console.log('User logged in:', data.user);
+        router.back();
+      }
+    } catch (error) {
+      console.error('Error signing in with Google:', error);
+    }
+  };
 
   // 处理谷歌登录按钮点击
   // promptAsync() 会打开浏览器进行 OAuth 授权
