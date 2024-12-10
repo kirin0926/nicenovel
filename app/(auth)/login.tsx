@@ -26,11 +26,12 @@ import { supabase } from '@/lib/supabase';
 WebBrowser.maybeCompleteAuthSession();
 
 export default function Login() {
-  // useAuthRequest 钩子用于创建 Google OAuth 请求
+  // useAuthRequest 钩子用于创建 Google OAuth 请求 
+  // useIdTokenAuthRequest 用于获取 id_token
   // request: OAuth 请求对象
   // response: 授权响应结果
   // promptAsync: 触发授权流程的函数
-  const [request, response, promptAsync] = Google.useAuthRequest({
+  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
     androidClientId: "643989459317-9db0hp4bkr8i0ap0pfa4se9ah599i8ea.apps.googleusercontent.com",
     iosClientId: "643989459317-9db0hp4bkr8i0ap0pfa4se9ah599i8ea.apps.googleusercontent.com",
     webClientId: "643989459317-8m42ib4asihivfk4k73gk32l874kjna6.apps.googleusercontent.com",
@@ -41,11 +42,11 @@ export default function Login() {
   // 如果成功，可以获取到 access token 进行后续操作
   useEffect(() => {
     if (response?.type === 'success') {
-      const { authentication } = response;
-      const token = authentication?.idToken as string;
-      console.log('response', response);
-      console.log('token', token);
-      signInWithSupabase(token);
+      // console.log('response', response);
+      // const token = response.authentication?.accessToken as string;
+      // const idToken = response.authentication?.idToken as string;
+      const idToken = response.params?.id_token as string;
+      signInWithSupabase(idToken);
     }
   }, [response]);
 
@@ -60,10 +61,8 @@ export default function Login() {
         console.error('Error signing in with Google:', error);
         return;
       }
-      if (data.user) {
-        console.log('User logged in:', data.user);
-        router.back();
-      }
+      console.log('Supabase auth success: ok',);
+      router.back();
     } catch (error) {
       console.error('Error signing in with Google:', error);
     }
@@ -88,7 +87,7 @@ export default function Login() {
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
       <View style={styles.content}>
-        <Text style={styles.subtitle}>请选择登录方式</Text>
+        <Text style={styles.subtitle}>请选择登录方式ios</Text>
         
         <TouchableOpacity 
           style={[styles.loginButton, styles.googleButton]}

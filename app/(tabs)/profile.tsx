@@ -4,7 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { useUser } from '@/lib/UserContext';
 
 export default function Profile() {
-  const { user } = useUser();
+  const { user, signOut } = useUser();
   const isLoggedIn = !!user;
 
   if (!isLoggedIn) {
@@ -48,6 +48,12 @@ export default function Profile() {
         onPress={() => router.push('/subscription')}>
         <FontAwesome name="diamond" size={24} color="white" style={styles.vipIcon} />
         <Text style={styles.vipButtonText}>开通会员</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.logoutButton}
+        onPress={signOut}>
+        <Text style={styles.logoutButtonText}>退出登录</Text>
       </TouchableOpacity>
     </View>
   );
@@ -126,6 +132,22 @@ const styles = StyleSheet.create({
   },
   loginButtonText: {
     color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  logoutButton: {
+    backgroundColor: '#f5f5f5',
+    margin: 20,
+    marginTop: 0,
+    padding: 15,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoutButtonText: {
+    color: '#666',
     fontSize: 18,
     fontWeight: 'bold',
   },
