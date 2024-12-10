@@ -38,7 +38,12 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // 1. 初始化：获取当前会话状态
     // 应用启动时检查是否有现存的会话
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } ,error}) => {
+      if (error) {
+        console.error('Session error:', error);
+        // 处理错误，可能需要重新登录
+        return;
+      }
       setSession(session);
       setUser(session?.user ?? null);
     });
@@ -46,8 +51,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     // 2. 设置监听器：监听认证状态变化
     // onAuthStateChange 会在用户登录、登出、token 刷新等事件时触发
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+      if (_event === 'TOKEN_REFRESHED' || _event === 'SIGNED_IN') {
+        setSession(session);
+        setUser(session?.user ?? null);
+      } else if (_event === 'SIGNED_OUT') {
+        setSession(null);
+        setUser(null);
+      }
     });
 
     // 3. 清理函数：组件卸载时取消订阅

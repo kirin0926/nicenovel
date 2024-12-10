@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, Dimensions } from 'react-native';
 import { router } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
+import { supabase } from '../../lib/supabase';
 
 const { width } = Dimensions.get('window');
 const COLUMN_WIDTH = (width - 32) / 2;
@@ -11,27 +12,36 @@ interface Novel {
   title: string;
   author: string;
   cover: string;
-  likes: number;
+  like: number;
 }
 
 export default function Home() {
-  const [novels] = useState<Novel[]>([
-    {
-      id: '1',
-      title: '仙逆',
-      author: '耳根',
-      cover: 'https://picsum.photos/200/300',
-      likes: 1234,
-    },
-    {
-      id: '2',
-      title: '凡人修仙传',
-      author: '忘语',
-      cover: 'https://picsum.photos/200/300',
-      likes: 5678,
-    },
-    // Add more sample novels as needed
-  ]);
+  const [novels, setNovels] = useState<Novel[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchNovels();
+  }, []);
+
+  async function fetchNovels() {
+    try {
+      const { data, error } = await supabase
+        .from('novels')
+        .select('*');
+
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        setNovels(data);
+      }
+    } catch (error) {
+      console.error('Error fetching novels:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const renderNovelItem = ({ item }: { item: Novel }) => (
     <TouchableOpacity
@@ -42,11 +52,13 @@ export default function Home() {
       })}>
       <Image source={{ uri: item.cover }} style={styles.coverImage} />
       <View style={styles.novelInfo}>
-        <Text style={styles.title} numberOfLines={1}>{item.title}</Text>
-        <Text style={styles.author} numberOfLines={1}>{item.author}</Text>
-        <View style={styles.likesContainer}>
-          <FontAwesome name="heart" size={12} color="#FF6B6B" />
-          <Text style={styles.likes}>{item.likes}</Text>
+        <Text style={styles.title} numberOfLines={2}>{item.title}</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Text style={styles.author} numberOfLines={1}>{item.author}</Text>
+          <View style={styles.likesContainer}>
+            <FontAwesome name="heart" size={12} color="#FF6B6B" />
+            <Text style={styles.likes}>{item.like}</Text>
+          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -54,14 +66,20 @@ export default function Home() {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={novels}
-        renderItem={renderNovelItem}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
-        columnWrapperStyle={styles.row}
-        contentContainerStyle={styles.list}
-      />
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <Text>loading...</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={novels}
+          renderItem={renderNovelItem}
+          keyExtractor={(item) => item.id}
+          numColumns={2}
+          columnWrapperStyle={styles.row}
+          contentContainerStyle={styles.list}
+        />
+      )}
     </View>
   );
 }
@@ -111,5 +129,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666',
     marginLeft: 4,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 }); 

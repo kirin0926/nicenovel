@@ -1,31 +1,46 @@
 import { Tabs } from 'expo-router';
-import { FontAwesome } from '@expo/vector-icons';
+import { Image } from 'react-native';
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#007AFF',
+        tabBarActiveTintColor: '#FF629A',
       }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: '首页',
-          tabBarIcon: ({ color }) => <FontAwesome name="home" size={24} color={color} />,
+          title: 'home',
+          tabBarIcon: ({ color, focused }) => (
+            <Image 
+              source={focused ? require('@/assets/images/tab/indexcheck.png') : require('@/assets/images/tab/index.png')}
+              style={{ width: 24, height: 24, tintColor: color }}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="bookshelf"
         options={{
-          title: '书架',
-          tabBarIcon: ({ color }) => <FontAwesome name="book" size={24} color={color} />,
+          title: 'bookshelf',
+          tabBarIcon: ({ color, focused }) => (
+            <Image 
+              source={focused ? require('@/assets/images/tab/bookshelfcheck.png') : require('@/assets/images/tab/bookshelf.png')}
+              style={{ width: 24, height: 24, tintColor: color }}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: '我的',
-          tabBarIcon: ({ color }) => <FontAwesome name="user" size={24} color={color} />,
+          title: 'mine',
+          tabBarIcon: ({ color, focused }) => (
+            <Image 
+              source={focused ? require('@/assets/images/tab/minecheck.png') : require('@/assets/images/tab/mine.png')}
+              style={{ width: 24, height: 24, tintColor: color }}
+            />
+          ),
         }}
       />
     </Tabs>

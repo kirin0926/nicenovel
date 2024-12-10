@@ -1,15 +1,162 @@
-import { View, Text, StyleSheet } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  ScrollView, 
+  Pressable, 
+  SafeAreaView,
+} from 'react-native';
+import { useLocalSearchParams, router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { supabase } from '../lib/supabase';
+import { useEffect, useState } from 'react';
 
-export default function ReaderScreen() {
+interface Chapter {
+  id: string;
+  title: string;
+  content: string;
+  chapter_number: number;
+  novel_id: string;
+}
+
+export default function ReadScreen() {
   const { id } = useLocalSearchParams();
+  const [showControls, setShowControls] = useState(true);
+  const [fontSize, setFontSize] = useState(18);
+  const [chapter, setChapter] = useState<Chapter | null>(null);
+  const [nextChapter, setNextChapter] = useState<Chapter | null>(null);
+  const [prevChapter, setPrevChapter] = useState<Chapter | null>(null);
+
+  useEffect(() => {
+    async function fetchChapters() {
+      try {
+        // 获取当前章节
+        const { data: currentChapter, error: currentError } = await supabase
+          .from('novels')
+          .select('*')
+          .eq('id', id)
+          .limit(1)
+          .single();
+
+        if (currentError) throw currentError;
+        if (currentChapter) {
+          setChapter(currentChapter);
+
+          // 获取上一章
+          // const { data: prevData } = await supabase
+          //   .from('chapters')
+          //   .select('*')
+          //   .eq('novel_id', id)
+          //   .lt('chapter_number', currentChapter.chapter_number)
+          //   .order('chapter_number', { ascending: false })
+          //   .limit(1)
+          //   .single();
+          
+          // setPrevChapter(prevData);
+
+          // // 获取下一章
+          // const { data: nextData } = await supabase
+          //   .from('novels')
+          //   .select('*')
+          //   .eq('novel_id', id)
+          //   .gt('chapter_number', currentChapter.chapter_number)
+          //   .order('chapter_number', { ascending: true })
+          //   .limit(1)
+          //   .single();
+          // setNextChapter(nextData);
+        }
+      } catch (error) {
+        console.error('Error fetching chapters:', error);
+      }
+    }
+
+    fetchChapters();
+  }, [id]);
+
+  const toggleControls = () => {
+    setShowControls(!showControls);
+  };
+
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/');
+    }
+  };
+
+  const navigateToChapter = async (chapterId: string) => {
+    // 这里可以添加导航到指定章节的逻辑
+    // 可以通过修改 URL 参数或其他方式实现
+  };
+
+  if (!chapter) {
+    return (
+      <SafeAreaView style={styles.container}>
+        {/* Loading... */}
+        <Text></Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.content}>
-        正在阅读小说ID: {id}
-      </Text>
-    </View>
+    <SafeAreaView style={styles.container}>
+      <View style={[styles.controlsContainer, !showControls && styles.hidden]}>
+        <View style={styles.header}>
+          <Pressable style={styles.backButton} onPress={handleBack}>
+            <Ionicons name="chevron-back" size={24} color="#333" />
+          </Pressable>
+          <Text style={styles.title} numberOfLines={1}>
+            {chapter.title}
+          </Text>
+          <Pressable style={styles.settingsButton}>
+            <Ionicons name="settings-outline" size={24} color="#333" />
+          </Pressable>
+        </View>
+      </View>
+
+      <ScrollView 
+        style={styles.content}
+        onTouchStart={toggleControls}
+      >
+        <Text style={[styles.contentText, { fontSize }]}>
+          {chapter.content}
+        </Text>
+      </ScrollView>
+
+      <View style={[styles.controlsContainer, !showControls && styles.hidden]}>
+        <View style={styles.footer}>
+          <Pressable 
+            style={[styles.navButton, !prevChapter && styles.disabledButton]}
+            disabled={!prevChapter}
+            onPress={() => prevChapter && navigateToChapter(prevChapter.id)}
+          >
+            <Text style={styles.navButtonText}>上一章</Text>
+          </Pressable>
+          <View style={styles.fontControls}>
+            <Pressable 
+              style={styles.fontButton}
+              onPress={() => setFontSize(Math.max(14, fontSize - 2))}
+            >
+              <Text style={styles.fontButtonText}>A-</Text>
+            </Pressable>
+            <Pressable 
+              style={styles.fontButton}
+              onPress={() => setFontSize(Math.min(24, fontSize + 2))}
+            >
+              <Text style={styles.fontButtonText}>A+</Text>
+            </Pressable>
+          </View>
+          <Pressable 
+            style={[styles.navButton, !nextChapter && styles.disabledButton]}
+            disabled={!nextChapter}
+            onPress={() => nextChapter && navigateToChapter(nextChapter.id)}
+          >
+            <Text style={styles.navButtonText}>下一章</Text>
+          </Pressable>
+        </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -17,10 +164,78 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    padding: 16,
+  },
+  controlsContainer: {
+    opacity: 1,
+  },
+  hidden: {
+    opacity: 0,
+    height: 0,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: 'white',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  backButton: {
+    padding: 4,
+  },
+  title: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginHorizontal: 16,
+  },
+  settingsButton: {
+    padding: 4,
   },
   content: {
-    fontSize: 16,
-    lineHeight: 24,
+    flex: 1,
+    padding: 16,
+  },
+  contentText: {
+    lineHeight: 28,
+    color: '#333',
+  },
+  footer: {
+    display: 'none',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: 'white',
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
+  navButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: '#007AFF',
+    borderRadius: 4,
+  },
+  navButtonText: {
+    color: 'white',
+    fontSize: 14,
+  },
+  disabledButton: {
+    backgroundColor: '#ccc',
+  },
+  fontControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  fontButton: {
+    padding: 8,
+    marginHorizontal: 8,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 4,
+  },
+  fontButtonText: {
+    fontSize: 14,
+    color: '#333',
   },
 }); 

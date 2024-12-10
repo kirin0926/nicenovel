@@ -13,7 +13,7 @@ export default function RootLayout() {
           },
           headerTintColor: '#000',
           headerTitleStyle: {
-            fontWeight: 'bold',
+            fontWeight: 'normal',
           },
           headerShadowVisible: false,
           headerTitleAlign: 'center',
@@ -32,8 +32,8 @@ export default function RootLayout() {
         <Stack.Screen
           name="novel"
           options={{
-            title: '阅读',
-            headerShown: true,
+            title: 'detail',
+            headerShown: false,
             presentation: 'card',
             headerTitleAlign: 'center',
           }}

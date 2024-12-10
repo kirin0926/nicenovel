@@ -34,7 +34,7 @@ export default function Profile() {
         <Image source={{ uri: userData.avatar }} style={styles.avatar} />
         <View style={styles.userInfo}>
           <Text style={styles.nickname}>{userData.nickname}</Text>
-          <Text style={styles.userId}>ID: {userData.id}</Text>
+          <Text style={styles.userId} numberOfLines={1}>ID: {userData.id}</Text>
           <View style={styles.vipBadge}>
             <Text style={[styles.vipText, !userData.isVip && styles.nonVipText]}>
               {userData.isVip ? 'VIP会员' : '普通用户'}
@@ -46,7 +46,7 @@ export default function Profile() {
       <TouchableOpacity
         style={styles.vipButton}
         onPress={() => router.push('/subscription')}>
-        <FontAwesome name="diamond" size={24} color="white" style={styles.vipIcon} />
+        {/* <FontAwesome name="diamond" size={24} color="white" style={styles.vipIcon} /> */}
         <Text style={styles.vipButtonText}>开通会员</Text>
       </TouchableOpacity>
 

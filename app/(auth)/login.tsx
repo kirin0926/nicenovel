@@ -58,6 +58,12 @@ export default function Login() {
         token: token,
       });
       if (error) {
+        if (error.message.includes('Refresh Token Not Found')) {
+          // 清除本地存储的认证信息
+          await supabase.auth.signOut();
+          // 重新引导用户登录
+          router.replace('/(auth)/login');
+        }
         console.error('Error signing in with Google:', error);
         return;
       }
