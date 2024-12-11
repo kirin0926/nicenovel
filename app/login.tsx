@@ -62,7 +62,7 @@ export default function Login() {
           // 清除本地存储的认证信息
           await supabase.auth.signOut();
           // 重新引导用户登录
-          router.replace('/(auth)/login');
+          router.replace('/login');
         }
         console.error('Error signing in with Google:', error);
         return;
@@ -93,14 +93,14 @@ export default function Login() {
     <SafeAreaView style={styles.container}>
       {/* <StatusBar style="dark" /> */}
       <View style={styles.content}>
-        <Text style={styles.subtitle}>请选择登录方式ios</Text>
+        <Text style={styles.subtitle}>chiose login way</Text>
         
         <TouchableOpacity 
           style={[styles.loginButton, styles.googleButton]}
           onPress={handleGoogleLogin}
         >
           <FontAwesome name="google" size={20} color="white" />
-          <Text style={styles.loginButtonText}>通过谷歌登录</Text>
+          <Text style={styles.loginButtonText}>Google Login</Text>
         </TouchableOpacity>
 
         {Platform.OS === 'ios' && (
@@ -109,7 +109,7 @@ export default function Login() {
             onPress={handleAppleLogin}
           >
             <FontAwesome name="apple" size={24} color="white" />
-            <Text style={styles.loginButtonText}>通过苹果登录</Text>
+            <Text style={styles.loginButtonText}>Apple Login</Text>
           </TouchableOpacity>
         )}
 
@@ -117,7 +117,7 @@ export default function Login() {
           style={styles.closeButton}
           onPress={() => router.back()}
         >
-          <Text style={styles.closeButtonText}>暂不登录</Text>
+          <Text style={styles.closeButtonText}>not now</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

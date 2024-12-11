@@ -41,7 +41,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     supabase.auth.getSession().then(({ data: { session } ,error}) => {
       if (error) {
         console.error('Session error:', error);
-        // 处理错误，可能需要重新登录
+        // 如果是 refresh token 错误，清除会话
+        if (error.message.includes('Refresh Token Not Found')) {
+          supabase.auth.signOut();
+        }
         return;
       }
       setSession(session);
@@ -50,13 +53,16 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
     // 2. 设置监听器：监听认证状态变化
     // onAuthStateChange 会在用户登录、登出、token 刷新等事件时触发
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (_event === 'TOKEN_REFRESHED' || _event === 'SIGNED_IN') {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') {
         setSession(session);
         setUser(session?.user ?? null);
-      } else if (_event === 'SIGNED_OUT') {
+      } else if (event === 'SIGNED_OUT') {
         setSession(null);
         setUser(null);
+      } else if (event === 'USER_UPDATED') {
+        setSession(session);
+        setUser(session?.user ?? null);
       }
     });
 

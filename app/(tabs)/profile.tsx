@@ -13,8 +13,8 @@ export default function Profile() {
         <View style={styles.loginContainer}>
           <TouchableOpacity
             style={styles.loginButton}
-            onPress={() => router.push('/(auth)/login')}>
-            <Text style={styles.loginButtonText}>登录/注册</Text>
+            onPress={() => router.push('/login')}>
+            <Text style={styles.loginButtonText}>Login/Register</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -37,7 +37,7 @@ export default function Profile() {
           <Text style={styles.userId} numberOfLines={1}>ID: {userData.id}</Text>
           <View style={styles.vipBadge}>
             <Text style={[styles.vipText, !userData.isVip && styles.nonVipText]}>
-              {userData.isVip ? 'VIP会员' : '普通用户'}
+              {userData.isVip ? 'VIP' : 'nomal'}
             </Text>
           </View>
         </View>
@@ -47,13 +47,13 @@ export default function Profile() {
         style={styles.vipButton}
         onPress={() => router.push('/subscription')}>
         {/* <FontAwesome name="diamond" size={24} color="white" style={styles.vipIcon} /> */}
-        <Text style={styles.vipButtonText}>开通会员</Text>
+        <Text style={styles.vipButtonText}>Membership</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.logoutButton}
         onPress={signOut}>
-        <Text style={styles.logoutButtonText}>退出登录</Text>
+        <Text style={styles.logoutButtonText}>logout</Text>
       </TouchableOpacity>
     </View>
   );
@@ -66,20 +66,20 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: 'white',
-    padding: 20,
+    padding: 15,
     flexDirection: 'row',
     alignItems: 'center',
   },
   avatar: {
-    width: 80,
-    height: 80,
+    width: 60,
+    height: 60,
     borderRadius: 40,
   },
   userInfo: {
-    marginLeft: 20,
+    marginLeft: 15,
   },
   nickname: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 4,
   },
@@ -122,10 +122,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: 10,
   },
   loginButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#FF629A',
     paddingHorizontal: 40,
     paddingVertical: 15,
     borderRadius: 8,
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   },
   loginButtonText: {
     color: 'white',
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: 'bold',
   },
   logoutButton: {
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   },
   logoutButtonText: {
     color: '#666',
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: 'bold',
   },
 }); 
