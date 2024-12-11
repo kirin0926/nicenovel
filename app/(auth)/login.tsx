@@ -13,7 +13,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { router } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
+// import { StatusBar } from 'expo-status-bar';
 import { FontAwesome } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
@@ -91,7 +91,7 @@ export default function Login() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar style="dark" />
+      {/* <StatusBar style="dark" /> */}
       <View style={styles.content}>
         <Text style={styles.subtitle}>请选择登录方式ios</Text>
         

@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 export default function Bookshelf() {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>我的书架</Text>
+      <Text style={styles.text}>Bookshelf</Text>
     </View>
   );
 }

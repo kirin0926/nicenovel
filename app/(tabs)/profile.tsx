@@ -101,6 +101,7 @@ const styles = StyleSheet.create({
     color: '#999',
   },
   vipButton: {
+    display: 'none',
     backgroundColor: '#007AFF',
     margin: 20,
     padding: 15,
@@ -138,7 +139,7 @@ const styles = StyleSheet.create({
   logoutButton: {
     backgroundColor: '#f5f5f5',
     margin: 20,
-    marginTop: 0,
+    marginTop: 20,
     padding: 15,
     borderRadius: 8,
     borderWidth: 1,

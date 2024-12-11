@@ -5,7 +5,9 @@ import {
   ScrollView, 
   Pressable, 
   SafeAreaView,
+  useWindowDimensions
 } from 'react-native';
+import RenderHtml from 'react-native-render-html';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../lib/supabase';
@@ -26,6 +28,7 @@ export default function ReadScreen() {
   const [chapter, setChapter] = useState<Chapter | null>(null);
   const [nextChapter, setNextChapter] = useState<Chapter | null>(null);
   const [prevChapter, setPrevChapter] = useState<Chapter | null>(null);
+  const { width } = useWindowDimensions(); // 获取屏幕宽度用于渲染HTML
 
   useEffect(() => {
     async function fetchChapters() {
@@ -119,9 +122,20 @@ export default function ReadScreen() {
         style={styles.content}
         onTouchStart={toggleControls}
       >
-        <Text style={[styles.contentText, { fontSize }]}>
-          {chapter.content}
-        </Text>
+        <RenderHtml
+          contentWidth={width}
+          source={{ html: chapter?.content || '' }}
+          tagsStyles={{
+            body: {
+              fontSize: fontSize,
+              lineHeight: fontSize * 1.5,
+              color: '#333',
+            },
+            p: {
+              marginBottom: 10,
+            }
+          }}
+        />
       </ScrollView>
 
       <View style={[styles.controlsContainer, !showControls && styles.hidden]}>
