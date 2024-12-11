@@ -98,9 +98,9 @@ const styles = StyleSheet.create({
   novelCard: {
     width: COLUMN_WIDTH,
     backgroundColor: 'white',
-    borderRadius: 8,
-    marginBottom: 16,
-    elevation: 2,
+    borderRadius: 8,//圆角
+    marginBottom: 16,//下边距
+    elevation: 0.3,//阴影
   },
   coverImage: {
     width: COLUMN_WIDTH,
