@@ -1,18 +1,32 @@
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 
 const subscriptionPlans = [
-  { id: 1, days: 3, price: 9.9, label: '3天体验' },
-  { id: 2, days: 7, price: 19.99, label: '7天会员' },
-  { id: 3, days: 30, price: 29.99, label: '30天会员' },
-  { id: 4, days: 90, price: 69.99, label: '90天会员' },
-  { id: 5, days: 365, price: 169.99, label: '365天会员' },
+  { id: 1, days: 3, price: 9.9, label: '3day' },
+  { id: 2, days: 7, price: 19.99, label: '7day' },
+  { id: 3, days: 30, price: 29.99, label: '30day' },
+  { id: 4, days: 90, price: 69.99, label: '90day' },
+  { id: 5, days: 365, price: 169.99, label: '365天day' },
 ];
 
 export default function Subscription() {
   const handleSubscribe = (plan: typeof subscriptionPlans[0]) => {
-    // Implement subscription logic here
-    console.log('Subscribe to plan:', plan);
+    Alert.alert(
+      '确认订阅',
+      `确认订阅 ${plan.days} 天会员？\n价格：$${plan.price}`,
+      [
+        {
+          text: '取消',
+          style: 'cancel',
+        },
+        {
+          text: '确认',
+          onPress: async () => {
+            console.log('Confirmed subscription:', plan);
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -45,7 +59,7 @@ export default function Subscription() {
             style={styles.planCard}
             onPress={() => handleSubscribe(plan)}>
             <Text style={styles.planLabel}>{plan.label}</Text>
-            <Text style={styles.planPrice}>¥{plan.price}</Text>
+            <Text style={styles.planPrice}>${plan.price}</Text>
           </TouchableOpacity>
         ))}
       </View>

@@ -77,7 +77,7 @@ export default function ReadScreen() {
   }, [id]);
 
   const toggleControls = () => {
-    setShowControls(!showControls);
+    // setShowControls(!showControls);
   };
 
   const handleBack = () => {

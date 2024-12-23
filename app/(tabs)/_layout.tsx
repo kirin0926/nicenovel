@@ -16,7 +16,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Image 
               source={focused ? require('@/assets/images/tab/indexcheck.png') : require('@/assets/images/tab/index.png')}
-              style={{ width: 24, height: 24, tintColor: color }}
+              style={{ width: 26, height: 25, tintColor: color }}
             />
           ),
         }}
@@ -28,7 +28,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Image 
               source={focused ? require('@/assets/images/tab/bookshelfcheck.png') : require('@/assets/images/tab/bookshelf.png')}
-              style={{ width: 24, height: 24, tintColor: color }}
+              style={{ width: 25, height: 25, tintColor: color }}
             />
           ),
         }}
@@ -40,7 +40,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Image 
               source={focused ? require('@/assets/images/tab/minecheck.png') : require('@/assets/images/tab/mine.png')}
-              style={{ width: 24, height: 24, tintColor: color }}
+              style={{ width: 25, height: 25, tintColor: color }}
             />
           ),
         }}
