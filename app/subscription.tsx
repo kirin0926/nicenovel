@@ -33,14 +33,14 @@ export default function Subscription() {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <FontAwesome name="diamond" size={40} color="#FFD700" />
-        <Text style={styles.title}>VIP会员特权</Text>
-        <Text style={styles.subtitle}>解锁全部小说，尊享无广告阅读体验</Text>
+        <Text style={styles.title}>SVIP membership</Text>
+        <Text style={styles.subtitle}>SVIP members can read all novels for free.</Text>
       </View>
 
       <View style={styles.benefitsContainer}>
         <View style={styles.benefitItem}>
           <FontAwesome name="book" size={24} color="#007AFF" />
-          <Text style={styles.benefitText}>海量小说免费读</Text>
+          <Text style={styles.benefitText}>Read all SVIP stories</Text>
         </View>
         <View style={styles.benefitItem}>
           <FontAwesome name="ban" size={24} color="#007AFF" />
@@ -65,13 +65,13 @@ export default function Subscription() {
       </View>
 
       <View style={styles.noticeContainer}>
-        <Text style={styles.noticeTitle}>订阅须知：</Text>
+        <Text style={styles.noticeTitle}>Tips：</Text>
         <Text style={styles.noticeText}>
-          1. 订阅会员后立即生效，可享受会员特权{'\n'}
-          2. 会员有效期内可畅读全站小说内容{'\n'}
-          3. 付款成功后不支持退款{'\n'}
-          4. 会员到期后自动转为普通用户{'\n'}
-          5. 如有问题请联系客服
+        1.When you recharge SVIP,the system will automaticallyconvert the currency of your region for payment;{'\n'}
+        2.SVIP is a virtual commodity.Once it's recharged,it's non-refundable;{'\n'}
+        3.After recharging SVIP,you can read all the short stories inthe SVIP section during the validity period;{'\n'}
+        4.If the account is not available for along time afterrecharging SVIP,please click here to contact us. We willfollow up and help you;{'\n'}
+        5.Working time :Monday to Friday, 10AM - 10PM
         </Text>
       </View>
     </ScrollView>
@@ -104,6 +104,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: 20,
     marginTop: 12,
+    display: 'none',
   },
   benefitItem: {
     alignItems: 'center',

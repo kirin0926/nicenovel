@@ -22,6 +22,9 @@
       "android": {
         "buildType": "apk"
       },
+      "ios": {
+        "distribution": "store"
+      },
       "autoIncrement": true
     }
   },

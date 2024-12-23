@@ -1,12 +1,12 @@
 import { Stack } from "expo-router";
-// import { StatusBar } from 'expo-status-bar';
+import { StatusBar } from 'expo-status-bar';
 import { UserProvider } from '@/lib/UserContext';
 // import { screenOptions } from '@/styles/navigation.ts';
 
 export default function RootLayout() {
   return (
     <UserProvider>
-      {/* <StatusBar style="dark" /> */}
+      <StatusBar style="light"/>
       <Stack
         screenOptions={{
           headerStyle: {
