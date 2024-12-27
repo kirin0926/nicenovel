@@ -8,6 +8,10 @@ export default function TabLayout() {
         tabBarActiveTintColor: '#FF629A',
         headerShadowVisible: false,
         headerTitleAlign: 'center',
+        tabBarStyle: {
+          elevation: 0,  // Android 去除阴影
+          shadowOpacity: 0, // iOS 去除阴影
+        }
       }}>
       <Tabs.Screen
         name="index"

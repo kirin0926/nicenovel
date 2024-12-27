@@ -3,10 +3,15 @@ import { StatusBar } from 'expo-status-bar';
 import { UserProvider } from '@/lib/UserContext';
 // import { screenOptions } from '@/styles/navigation.ts';
 
+// 引入 analytics 服务
+import { initializeAnalytics } from '@/services/analytics';
+// 在应用启动时调用
+initializeAnalytics();
+
 export default function RootLayout() {
   return (
     <UserProvider>
-      <StatusBar style="light"/>
+      <StatusBar style="dark"/>
       <Stack
         screenOptions={{
           headerStyle: {

@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, Dimensions }
 import { router } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
+import { Analytics } from '../../services/analytics';
 
 const { width } = Dimensions.get('window');
 const COLUMN_WIDTH = (width - 32) / 2;
@@ -20,6 +21,11 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    Analytics.trackPageView('Home', {
+      timestamp: new Date().toISOString(),
+      numberOfNovels: novels.length
+    });
+    
     fetchNovels();
   }, []);
 
