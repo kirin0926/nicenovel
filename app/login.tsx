@@ -21,6 +21,7 @@ import { useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 // import { makeRedirectUri } from 'expo-auth-session';
 // import * as AppleAuthentication from 'expo-auth-session/providers/apple';
+import { Analytics } from '@/services/analytics';
 
 // 确保在web浏览器完成身份验证后正确关闭
 WebBrowser.maybeCompleteAuthSession();
@@ -78,9 +79,17 @@ export default function Login() {
   // promptAsync() 会打开浏览器进行 OAuth 授权
   // 返回的 result 包含授权结果
   const handleGoogleLogin = async () => {
-    const result = await promptAsync();
-    if (result.type === 'success') {
-      console.log('Google login success');
+    try {
+      const result = await promptAsync();
+      if (result.type === 'success') {
+        console.log('Google login success');
+        Analytics.trackLogin('google', true);
+      } else {
+        Analytics.trackLogin('google', false, 'User cancelled or login failed');
+      }
+    } catch (error) {
+      console.error('Google login error:', error);
+      Analytics.trackLogin('google', false, error instanceof Error ? error.message : 'Unknown error');
     }
   };
 

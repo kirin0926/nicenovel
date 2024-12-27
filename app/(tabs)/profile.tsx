@@ -2,6 +2,7 @@ import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { useUser } from '@/lib/UserContext';
+import { Analytics } from '@/services/analytics';
 
 export default function Profile() {
   const { user, signOut } = useUser();
@@ -13,7 +14,12 @@ export default function Profile() {
         <View style={styles.loginContainer}>
           <TouchableOpacity
             style={styles.loginButton}
-            onPress={() => router.push('/login')}>
+            onPress={() => {
+              Analytics.trackEvent('Login Button Click', {
+                source: 'profile_page'
+              });
+              router.push('/login');
+            }}>
             <Text style={styles.loginButtonText}>Login/Register</Text>
           </TouchableOpacity>
         </View>

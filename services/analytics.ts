@@ -32,5 +32,14 @@ export const Analytics = {
       identify.set(key, value);
     });
     amplitude.identify(identify);
-  }
+  },
+  
+  trackLogin: (provider: 'google' | 'apple', success: boolean, error?: string) => {
+    amplitude.track('User Login', {
+      provider,
+      success,
+      error,
+      timestamp: new Date().toISOString()
+    });
+  },
 }; 
