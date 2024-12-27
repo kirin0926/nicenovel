@@ -12,6 +12,7 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../lib/supabase';
 import { useEffect, useState } from 'react';
+import { Analytics } from '../services/analytics';
 
 interface Chapter {
   id: string;
@@ -29,6 +30,7 @@ export default function ReadScreen() {
   const [nextChapter, setNextChapter] = useState<Chapter | null>(null);
   const [prevChapter, setPrevChapter] = useState<Chapter | null>(null);
   const { width } = useWindowDimensions(); // 获取屏幕宽度用于渲染HTML
+  const [pageEnterTime, setPageEnterTime] = useState<Date>(new Date());// 记录进入页面的时间
 
   useEffect(() => {
     async function fetchChapters() {
@@ -75,6 +77,30 @@ export default function ReadScreen() {
 
     fetchChapters();
   }, [id]);
+
+  useEffect(() => {
+    // 记录进入页面的时间
+    setPageEnterTime(new Date());
+    
+    // 发送页面访问事件
+    Analytics.trackPageView('Novel Reading', {
+      novelId: id,
+      chapterTitle: chapter?.title
+    });
+
+    // 在组件卸载时计算并发送停留时间
+    return () => {
+      const exitTime = new Date();
+      const durationInSeconds = Math.round((exitTime.getTime() - pageEnterTime.getTime()) / 1000);
+      
+      Analytics.trackEvent('Novel Reading Duration', {
+        novelId: id,
+        chapterTitle: chapter?.title,
+        durationInSeconds,
+        exitTime: exitTime.toISOString()
+      });
+    };
+  }, [id]); // 只在 id 变化时执行
 
   const toggleControls = () => {
     // setShowControls(!showControls);
