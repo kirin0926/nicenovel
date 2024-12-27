@@ -52,10 +52,13 @@ export default function Home() {
   const renderNovelItem = ({ item }: { item: Novel }) => (
     <TouchableOpacity
       style={styles.novelCard}
-      onPress={() => router.push({
-        pathname: '/novel',
-        params: { id: item.id }
-      })}>
+      onPress={() => {
+        Analytics.trackNovelClick(item.id, item.title, item.author);
+        router.push({
+          pathname: '/novel',
+          params: { id: item.id }
+        });
+      }}>
       <Image source={{ uri: item.cover }} style={styles.coverImage} />
       <View style={styles.novelInfo}>
         <Text style={styles.title} numberOfLines={2}>{item.title}</Text>

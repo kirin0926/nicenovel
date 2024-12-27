@@ -17,6 +17,15 @@ export const Analytics = {
     amplitude.track(eventName, properties);
   },
   
+  trackNovelClick: (novelId: string, novelTitle: string, novelAuthor: string) => {
+    amplitude.track('Novel Click', {
+      novelId,
+      novelTitle,
+      novelAuthor,
+      timestamp: new Date().toISOString()
+    });
+  },
+  
   setUserProperties: (properties: Record<string, any>) => {
     const identify = new amplitude.Identify();
     Object.entries(properties).forEach(([key, value]) => {
