@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 
 const subscriptionPlans = [
@@ -6,27 +6,12 @@ const subscriptionPlans = [
   { id: 2, days: 7, price: 19.99, label: '7day' },
   { id: 3, days: 30, price: 29.99, label: '30day' },
   { id: 4, days: 90, price: 69.99, label: '90day' },
-  { id: 5, days: 365, price: 169.99, label: '365天day' },
+  { id: 5, days: 365, price: 169.99, label: '365day' },
 ];
 
 export default function Subscription() {
   const handleSubscribe = (plan: typeof subscriptionPlans[0]) => {
-    Alert.alert(
-      '确认订阅',
-      `确认订阅 ${plan.days} 天会员？\n价格：$${plan.price}`,
-      [
-        {
-          text: '取消',
-          style: 'cancel',
-        },
-        {
-          text: '确认',
-          onPress: async () => {
-            console.log('Confirmed subscription:', plan);
-          },
-        },
-      ]
-    );
+    console.log('handleSubscribe', plan);
   };
 
   return (
@@ -57,6 +42,7 @@ export default function Subscription() {
           <TouchableOpacity
             key={plan.id}
             style={styles.planCard}
+            activeOpacity={0.9}
             onPress={() => handleSubscribe(plan)}>
             <Text style={styles.planLabel}>{plan.label}</Text>
             <Text style={styles.planPrice}>${plan.price}</Text>
@@ -115,6 +101,9 @@ const styles = StyleSheet.create({
   },
   plansContainer: {
     padding: 16,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
   planCard: {
     backgroundColor: 'white',
@@ -125,6 +114,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     elevation: 2,
+    width: '48%',
   },
   planLabel: {
     fontSize: 18,
@@ -133,12 +123,13 @@ const styles = StyleSheet.create({
   planPrice: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#007AFF',
+    color: '#FF629A',
   },
   noticeContainer: {
     padding: 16,
     backgroundColor: 'white',
     margin: 16,
+    marginTop:0,
     borderRadius: 8,
   },
   noticeTitle: {

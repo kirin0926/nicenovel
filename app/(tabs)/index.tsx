@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, Dimensions,ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
 import { Analytics } from '../../services/analytics';
+import { getOrCreateUUID } from '../../services/uuid';
 
 const { width } = Dimensions.get('window');
 const COLUMN_WIDTH = (width - 32) / 2;
@@ -20,12 +21,19 @@ export default function Home() {
   const [novels, setNovels] = useState<Novel[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [hasMore, setHasMore] = useState(true); // 是否还有更多数据
+
   useEffect(() => {
+    // 跟踪页面浏览
     Analytics.trackPageView('Home', {
       timestamp: new Date().toISOString(),
       numberOfNovels: novels.length
     });
-    
+    // 获取或创建用户UUID
+    getOrCreateUUID().then(uuid => {
+      console.log('Current UUID:', uuid);
+    });
+
     fetchNovels();
   }, []);
 
@@ -48,10 +56,25 @@ export default function Home() {
       setLoading(false);
     }
   }
+  // 加载更多数据
+  const loadMore = () => {
+    if (!hasMore || loading) return;
+    console.log('loadMore');
+    // setPage((prevPage) => prevPage + 1);
+    // fetchData(page + 1);
+  };
+  const renderFooter = () => {
+    if (!loading) return null;
+    return <ActivityIndicator 
+    size="large" // 设置加载动画的大小
+    color="blue" // 设置加载动画的颜色
+    />;
+  };
 
   const renderNovelItem = ({ item }: { item: Novel }) => (
     <TouchableOpacity
       style={styles.novelCard}
+      activeOpacity={0.9}
       onPress={() => {
         Analytics.trackNovelClick(item.id, item.title, item.author);
         router.push({
@@ -81,12 +104,15 @@ export default function Home() {
         </View>
       ) : (
         <FlatList
-          data={novels}
-          renderItem={renderNovelItem}
-          keyExtractor={(item) => item.id}
-          numColumns={2}
-          columnWrapperStyle={styles.row}
-          contentContainerStyle={styles.list}
+          data={novels}//设置数据
+          renderItem={renderNovelItem}//设置列表项
+          keyExtractor={(item) => item.id}//设置key
+          numColumns={2}//设置每行2列
+          columnWrapperStyle={styles.row}//设置每行2列
+          contentContainerStyle={styles.list}//设置列表的样式
+          onEndReached={loadMore} // 加载更多
+          onEndReachedThreshold={0.5} // 加载更多阈值
+          ListFooterComponent={renderFooter} // 加载更多组件
         />
       )}
     </View>
@@ -109,7 +135,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 8,//圆角
     marginBottom: 16,//下边距
-    elevation: 0.3,//阴影
+    elevation: 0,//阴影
   },
   coverImage: {
     width: COLUMN_WIDTH,
