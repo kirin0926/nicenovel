@@ -22,12 +22,13 @@ import { supabase } from '@/lib/supabase';
 // import { makeRedirectUri } from 'expo-auth-session';
 // import * as AppleAuthentication from 'expo-auth-session/providers/apple';
 import { Analytics } from '@/services/analytics';
+import { getOrCreateUUID } from '@/services/uuid';
 
 // 确保在web浏览器完成身份验证后正确关闭
 WebBrowser.maybeCompleteAuthSession();
 
 export default function Login() {
-  // useAuthRequest 钩子用于创建 Google OAuth 请求 
+  // useAuthRequest 钩子用于建 Google OAuth 请求 
   // useIdTokenAuthRequest 用于获取 id_token
   // request: OAuth 请求对象
   // response: 授权响应结果
@@ -68,7 +69,31 @@ export default function Login() {
         console.error('Error signing in with Google:', error);
         return;
       }
-      console.log('Supabase auth success: ok',);
+      
+      // 获取本地UUID
+      const localUUID = await getOrCreateUUID();
+
+      // 准备要更新的用户数据
+      const userData = {
+        user_id: data.user.id,
+        email: data.user.email,
+        full_name: data.user.user_metadata.full_name,
+        avatar_url: data.user.user_metadata.avatar_url,
+        provider: 'google',
+      };
+
+      // 更新user表
+      const { data: upsertData, error: upsertError } = await supabase
+      .from('user')// 更新user表
+      .update(userData)// 更新数据
+      .eq('uuid', localUUID)// 条件
+      .select()
+
+      if (upsertError) {
+        console.error('Error updating user table:', upsertError);
+      }
+      console.log('Supabase auth success: ok', upsertData);
+      console.log('Supabase auth success: ok', data);
       router.back();
     } catch (error) {
       console.error('Error signing in with Google:', error);
@@ -83,13 +108,13 @@ export default function Login() {
       const result = await promptAsync();
       if (result.type === 'success') {
         console.log('Google login success');
-        Analytics.trackLogin('google', true);
+        Analytics.trackLogin('google', true);// 跟踪登录成功
       } else {
-        Analytics.trackLogin('google', false, 'User cancelled or login failed');
+        Analytics.trackLogin('google', false, 'User cancelled or login failed');// 跟踪登录失败
       }
     } catch (error) {
       console.error('Google login error:', error);
-      Analytics.trackLogin('google', false, error instanceof Error ? error.message : 'Unknown error');
+      Analytics.trackLogin('google', false, error instanceof Error ? error.message : 'Unknown error');// 跟踪登录失败
     }
   };
 
