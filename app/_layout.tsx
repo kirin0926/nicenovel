@@ -1,15 +1,20 @@
 import { Stack } from "expo-router";
 import { StatusBar } from 'expo-status-bar';
 import { UserProvider } from '@/lib/UserContext';
-// import { screenOptions } from '@/styles/navigation.ts';
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
 
 // 引入 analytics 服务
 import { initializeAnalytics } from '@/services/analytics';
 // 在应用启动时调用
 initializeAnalytics();
 
+// Initialize Stripe
+const stripePromise = loadStripe('your_publishable_key'); // Replace with your actual publishable key
+
 export default function RootLayout() {
   return (
+    <Elements stripe={stripePromise}>
       <UserProvider>
         <StatusBar style="dark"/>
         <Stack
@@ -49,5 +54,6 @@ export default function RootLayout() {
           />
         </Stack>
       </UserProvider>
+    </Elements>
   );
 }

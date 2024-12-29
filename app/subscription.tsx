@@ -1,17 +1,112 @@
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity,Alert } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-
-const subscriptionPlans = [
-  { id: 1, days: 3, price: 9.9, label: '3day' },
-  { id: 2, days: 7, price: 19.99, label: '7day' },
-  { id: 3, days: 30, price: 29.99, label: '30day' },
-  { id: 4, days: 90, price: 69.99, label: '90day' },
-  { id: 5, days: 365, price: 169.99, label: '365day' },
-];
+import { supabase } from '../lib/supabase';
+import { useState, useEffect } from 'react';
+import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 
 export default function Subscription() {
-  const handleSubscribe = (plan: typeof subscriptionPlans[0]) => {
-    console.log('handleSubscribe', plan);
+  const [subscriptionPlans, setSubscriptionPlans] = useState<Array<{
+    id: string;
+    days: number;
+    price: number;
+    label: string;
+  }>>([]);
+
+  const stripe = useStripe();
+  const elements = useElements();
+
+  useEffect(() => {
+    fetchSubscriptionPlans();
+  }, []);
+
+  // 获取订阅计划
+  const fetchSubscriptionPlans = async () => {
+    try {
+      
+      let { data: stripe_prices, error } = await supabase
+      .from('stripe_prices')
+      .select('*')
+              
+      if (error) throw error;
+      if (!stripe_prices) return;
+      // console.log('stripe_prices', stripe_prices);
+      const formattedPlans = stripe_prices.map(plan => ({
+        id: plan.price_id,
+        days: plan.days,
+        price: plan.unit_amount / 100,
+        label: `${plan.nickname}`
+      }));
+
+      setSubscriptionPlans(formattedPlans);
+    } catch (error) {
+      console.error('Error fetching subscription plans:', error);
+    }
+  };
+
+  // 订阅按钮
+  const handleSubscribe = async (plan: typeof subscriptionPlans[0]) => {
+    if (!stripe || !elements) {
+      alert('Stripe has not been initialized');
+      return;
+    }
+
+    try {
+      // 1.创建支付意图
+      const response = await fetch('http://localhost:3000/create-subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: (await supabase.auth.getUser()).data.user?.email,
+          priceId: plan.id,
+        }),
+      });
+
+      const { clientSecret } = await response.json();
+      console.log('clientSecret', clientSecret);
+
+      // 2. 确认支付
+      const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(
+        clientSecret,
+        {
+          payment_method: {
+            card: elements.getElement(CardElement)!,
+          },
+        }
+      );
+      console.log('paymentIntent', paymentIntent);
+      if (stripeError) {
+        Alert.alert(`Payment failed: ${stripeError.message}`);
+        return;
+      }
+
+      // if (paymentIntent.status === 'succeeded') {
+      //   // 3. 更新订阅状态
+      //   const { data, error } = await supabase
+      //     .from('subscriptions')
+      //     .insert([
+      //       {
+      //         user_id: (await supabase.auth.getUser()).data.user?.id,
+      //         plan_id: plan.id,
+      //         status: 'active',
+      //         start_date: new Date().toISOString(),
+      //         end_date: new Date(Date.now() + plan.days * 24 * 60 * 60 * 1000).toISOString(),
+      //       },
+      //     ]);
+
+      //   if (error) {
+      //     console.error('Error updating subscription:', error);
+      //     Alert.alert('Payment successful but failed to update subscription. Please contact support.');
+      //     return;
+      //   }
+
+      //   Alert.alert('Successfully subscribed!');
+      // }
+    } catch (error) {
+      console.error('Error:', error);
+      Alert.alert('An error occurred during payment. Please try again.');
+    }
   };
 
   return (
@@ -29,11 +124,11 @@ export default function Subscription() {
         </View>
         <View style={styles.benefitItem}>
           <FontAwesome name="ban" size={24} color="#007AFF" />
-          <Text style={styles.benefitText}>完全无广告</Text>
+          <Text style={styles.benefitText}>No ads</Text>
         </View>
         <View style={styles.benefitItem}>
           <FontAwesome name="download" size={24} color="#007AFF" />
-          <Text style={styles.benefitText}>离线下载</Text>
+          <Text style={styles.benefitText}>Read All Stories</Text>
         </View>
       </View>
 
@@ -48,6 +143,25 @@ export default function Subscription() {
             <Text style={styles.planPrice}>${plan.price}</Text>
           </TouchableOpacity>
         ))}
+      </View>
+
+      <View style={styles.cardElementContainer}>
+        <CardElement
+          options={{
+            style: {
+              base: {
+                fontSize: '16px',
+                color: '#424770',
+                '::placeholder': {
+                  color: '#aab7c4',
+                },
+              },
+              invalid: {
+                color: '#9e2146',
+              },
+            },
+          }}
+        />
       </View>
 
       <View style={styles.noticeContainer}>
@@ -141,5 +255,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     lineHeight: 20,
+  },
+  cardElementContainer: {
+    backgroundColor: 'white',
+    padding: 20,
+    margin: 16,
+    borderRadius: 8,
+    marginTop: 0,
   },
 }); 

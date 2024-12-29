@@ -23,6 +23,7 @@ import { supabase } from '@/lib/supabase';
 // import * as AppleAuthentication from 'expo-auth-session/providers/apple';
 import { Analytics } from '@/services/analytics';
 import { getOrCreateUUID } from '@/services/uuid';
+import { storage } from '@/lib/storage-adapter';
 
 // 确保在web浏览器完成身份验证后正确关闭
 WebBrowser.maybeCompleteAuthSession();
@@ -70,6 +71,20 @@ export default function Login() {
         return;
       }
       
+      // 检查数据库表中用户ID是否已存在
+      let { data: existingUser, error: userError } = await supabase
+        .from('user')
+        .select('user_id')
+        .eq('user_id', data.user.id)
+        .single();
+        console.log('existingUser', existingUser);
+        if (existingUser) {
+          console.log('User already exists');
+          //保存uuid到本地
+          // await storage.setItem('uuid', existingUser.uuid);
+          return;
+        }
+
       // 获取本地UUID
       const localUUID = await getOrCreateUUID();
 
