@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   Platform,
   SafeAreaView,
+  Image
 } from 'react-native';
 import { router } from 'expo-router';
 // import { StatusBar } from 'expo-status-bar';
@@ -19,11 +20,9 @@ import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
 import { useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-// import { makeRedirectUri } from 'expo-auth-session';
 // import * as AppleAuthentication from 'expo-auth-session/providers/apple';
 import { Analytics } from '@/services/analytics';
 import { getOrCreateUUID } from '@/services/uuid';
-import { storage } from '@/lib/storage-adapter';
 
 // 确保在web浏览器完成身份验证后正确关闭
 WebBrowser.maybeCompleteAuthSession();
@@ -81,7 +80,6 @@ export default function Login() {
         if (existingUser) {
           console.log('User already exists');
           //保存uuid到本地
-          // await storage.setItem('uuid', existingUser.uuid);
           return;
         }
 
@@ -140,82 +138,42 @@ export default function Login() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* <StatusBar style="dark" /> */}
-      <View style={styles.content}>
-        <Text style={styles.subtitle}>chiose login way</Text>
+    <SafeAreaView className="flex-1 bg-white">
+      <View className="flex-1 p-5 justify-center">
+        {/* <View className="w-64 h-64 self-center mb-8">
+          <Image 
+            source={require('../assets/images/icon.png')}
+            className="w-full h-full"
+            resizeMode="contain"
+          />
+        </View> */}
+        <Text className="text-xl font-bold text-center mb-10">chiose login way</Text>
         
         <TouchableOpacity 
-          style={[styles.loginButton, styles.googleButton]}
+          className="flex-row items-center justify-center p-4 rounded-lg mb-4 bg-[#FF629A]"
           onPress={handleGoogleLogin}
         >
           <FontAwesome name="google" size={20} color="white" />
-          <Text style={styles.loginButtonText}>Google Login</Text>
+          <Text className="text-white text-base font-bold ml-3">Google Login</Text>
         </TouchableOpacity>
 
         {Platform.OS === 'ios' && (
           <TouchableOpacity 
-            style={[styles.loginButton, styles.appleButton]}
+            className="flex-row items-center justify-center p-4 rounded-lg mb-4 bg-black"
             onPress={handleAppleLogin}
           >
             <FontAwesome name="apple" size={24} color="white" />
-            <Text style={styles.loginButtonText}>Apple Login</Text>
+            <Text className="text-white text-base font-bold ml-3">Apple Login</Text>
           </TouchableOpacity>
         )}
 
         <TouchableOpacity 
-          style={styles.closeButton}
+          className="mt-5 items-center"
           onPress={() => router.back()}
         >
-          <Text style={styles.closeButtonText}>not now</Text>
+          <Text className="text-base text-gray-600">not now</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  content: {
-    flex: 1,
-    padding: 20,
-    justifyContent: 'center',
-  },
-  subtitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 40,
-  },
-  loginButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  googleButton: {
-    backgroundColor: '#DB4437',
-  },
-  appleButton: {
-    backgroundColor: '#000',
-  },
-  loginButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginLeft: 12,
-  },
-  closeButton: {
-    marginTop: 20,
-    alignItems: 'center',
-  },
-  closeButtonText: {
-    fontSize: 16,
-    color: '#666',
-  },
-}); 
+} 
