@@ -12,7 +12,7 @@ import { initializeAnalytics } from '@/services/analytics';
 initializeAnalytics();
 
 // Initialize Stripe
-const stripePromise = loadStripe('pk_test_51PBXHTDISTrmdpg8Px0ZFxMz42kbz2rQg2uiwnRt6HgAhLJrGeIpKShrHuiRk1wQCHwyTQYZVZnvBZiRZ5uBwmo2001GnjOGoD'); // Replace with your actual publishable key
+export const stripePromise = loadStripe('pk_test_51PBXHTDISTrmdpg8Px0ZFxMz42kbz2rQg2uiwnRt6HgAhLJrGeIpKShrHuiRk1wQCHwyTQYZVZnvBZiRZ5uBwmo2001GnjOGoD'); // Replace with your actual publishable key
 
 export default function RootLayout() {
   return (

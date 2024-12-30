@@ -2,7 +2,12 @@ import { StyleSheet, Text, View, ScrollView, TouchableOpacity,Alert } from 'reac
 import { FontAwesome } from '@expo/vector-icons';
 import { supabase } from '../lib/supabase';
 import { useState, useEffect } from 'react';
-import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
+import { useStripe, useElements, CardElement,Elements,PaymentElement,
+  CardNumberElement,
+  CardExpiryElement, 
+  CardCvcElement  } from '@stripe/react-stripe-js';
+// Initialize Stripe
+import { stripePromise } from '@/app/_layout';
 
 import {
   Drawer,
@@ -167,32 +172,46 @@ export default function Subscription() {
         anchor="bottom">
         <DrawerBackdrop />
         <DrawerContent>
+          {/* 关闭按钮 */}
           <DrawerHeader>
-            <DrawerCloseButton></DrawerCloseButton>
+            <DrawerCloseButton >
+              <View>
+                <Text>Cancel</Text>
+              </View>
+            </DrawerCloseButton>
           </DrawerHeader>
-          <DrawerBody />
+          {/* 支付方式 */}
+          <DrawerBody>
+            <Elements stripe={stripePromise}>
+              
+              <View style={[styles.cardElementWrapper]}>
+                  <CardElement
+                    options={{
+                      style: {
+                        base: {
+                          fontSize: '16px',
+                          color: '#424770',
+                          '::placeholder': {
+                            color: '#aab7c4',
+                          },
+                        },
+                        invalid: {
+                          color: '#9e2146',
+                        },
+                      },
+                    }}
+                  />
+                </View>
+            </Elements>
+          </DrawerBody>
+          
+          {/* <DrawerBody /> */}
+            
           <DrawerFooter />
         </DrawerContent>
       </Drawer>
 
-      <View style={styles.cardElementContainer}>
-        <CardElement
-          options={{
-            style: {
-              base: {
-                fontSize: '16px',
-                color: '#424770',
-                '::placeholder': {
-                  color: '#aab7c4',
-                },
-              },
-              invalid: {
-                color: '#9e2146',
-              },
-            },
-          }}
-        />
-      </View>
+      
 
       <View style={styles.noticeContainer}>
         <Text style={styles.noticeTitle}>Tips：</Text>
@@ -286,11 +305,10 @@ const styles = StyleSheet.create({
     color: '#666',
     lineHeight: 20,
   },
-  cardElementContainer: {
-    backgroundColor: 'white',
-    padding: 20,
-    margin: 16,
+  cardElementWrapper: {
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
     borderRadius: 8,
-    marginTop: 0,
+    padding: 12,
   },
 }); 
