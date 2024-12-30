@@ -133,6 +133,7 @@ export default function Login() {
     }
   };
 
+  // 处理苹果登录按钮点击
   const handleAppleLogin = () => {
     // TODO: 实现苹果登录逻辑
     console.log('苹果登录');

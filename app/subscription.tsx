@@ -2,22 +2,9 @@ import { StyleSheet, Text, View, ScrollView, TouchableOpacity,Alert } from 'reac
 import { FontAwesome } from '@expo/vector-icons';
 import { supabase } from '../lib/supabase';
 import { useState, useEffect } from 'react';
-import { useStripe, useElements, CardElement,Elements,PaymentElement,
-  CardNumberElement,
-  CardExpiryElement, 
-  CardCvcElement  } from '@stripe/react-stripe-js';
-// Initialize Stripe
-import { stripePromise } from '@/app/_layout';
+import { useStripe, useElements, CardElement} from '@stripe/react-stripe-js';
 
-import {
-  Drawer,
-  DrawerBackdrop,
-  DrawerContent,
-  DrawerHeader,
-  DrawerCloseButton,
-  DrawerBody,
-  DrawerFooter,
-} from "@/components/ui/drawer"
+import SubscriptionPlanDrawer from '@/components/pay/plan/SubscriptionPlanDrawer';
 
 export default function Subscription() {
   const [showDrawer, setShowDrawer] = useState(false)
@@ -30,6 +17,9 @@ export default function Subscription() {
 
   const stripe = useStripe();
   const elements = useElements();
+
+  // 添加选中状态
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
 
   useEffect(() => {
     fetchSubscriptionPlans();
@@ -129,186 +119,47 @@ export default function Subscription() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
+    <ScrollView className="flex-1 bg-gray-100">
+      <View className="bg-white p-5 items-center">
         <FontAwesome name="diamond" size={40} color="#FFD700" />
-        <Text style={styles.title}>SVIP membership</Text>
-        <Text style={styles.subtitle}>SVIP members can read all novels for free.</Text>
+        <Text className="text-2xl font-bold mt-4 mb-2">SVIP membership</Text>
+        <Text className="text-base text-gray-600">SVIP members can read all novels for free.</Text>
       </View>
 
-      <View style={styles.benefitsContainer}>
-        <View style={styles.benefitItem}>
+      <View className="flex-row justify-around bg-white p-5 mt-3 hidden">
+        <View className="items-center">
           <FontAwesome name="book" size={24} color="#007AFF" />
-          <Text style={styles.benefitText}>Read all SVIP stories</Text>
+          <Text className="mt-2 text-gray-700">Read all SVIP stories</Text>
         </View>
-        <View style={styles.benefitItem}>
+        <View className="items-center">
           <FontAwesome name="ban" size={24} color="#007AFF" />
-          <Text style={styles.benefitText}>No ads</Text>
+          <Text className="mt-2 text-gray-700">No ads</Text>
         </View>
-        <View style={styles.benefitItem}>
+        <View className="items-center">
           <FontAwesome name="download" size={24} color="#007AFF" />
-          <Text style={styles.benefitText}>Read All Stories</Text>
+          <Text className="mt-2 text-gray-700">Read All Stories</Text>
         </View>
       </View>
 
-      <View style={styles.plansContainer}>
-        {subscriptionPlans.map((plan) => (
-          <TouchableOpacity
-            key={plan.id}
-            style={styles.planCard}
-            activeOpacity={0.9}
-            onPress={() => setShowDrawer(true)}>
-              {/* handleSubscribe(plan) */}
-            <Text style={styles.planLabel}>{plan.label}</Text>
-            <Text style={styles.planPrice}>${plan.price}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+      <SubscriptionPlanDrawer
+        subscriptionPlans={subscriptionPlans}
+        selectedPlan={selectedPlan}
+        showDrawer={showDrawer}
+        setShowDrawer={setShowDrawer}
+        setSelectedPlan={setSelectedPlan}
+        onSubscribe={handleSubscribe}
+      />
 
-      <Drawer 
-        isOpen={showDrawer} 
-        onClose={() => setShowDrawer(false)} 
-        size="md"
-        anchor="bottom">
-        <DrawerBackdrop />
-        <DrawerContent>
-          {/* 关闭按钮 */}
-          <DrawerHeader>
-            <DrawerCloseButton >
-              <View>
-                <Text>Cancel</Text>
-              </View>
-            </DrawerCloseButton>
-          </DrawerHeader>
-          {/* 支付方式 */}
-          <DrawerBody>
-            <Elements stripe={stripePromise}>
-              
-              <View style={[styles.cardElementWrapper]}>
-                  <CardElement
-                    options={{
-                      style: {
-                        base: {
-                          fontSize: '16px',
-                          color: '#424770',
-                          '::placeholder': {
-                            color: '#aab7c4',
-                          },
-                        },
-                        invalid: {
-                          color: '#9e2146',
-                        },
-                      },
-                    }}
-                  />
-                </View>
-            </Elements>
-          </DrawerBody>
-          
-          {/* <DrawerBody /> */}
-            
-          <DrawerFooter />
-        </DrawerContent>
-      </Drawer>
-
-      
-
-      <View style={styles.noticeContainer}>
-        <Text style={styles.noticeTitle}>Tips：</Text>
-        <Text style={styles.noticeText}>
-        1.When you recharge SVIP,the system will automaticallyconvert the currency of your region for payment;{'\n'}
-        2.SVIP is a virtual commodity.Once it's recharged,it's non-refundable;{'\n'}
-        3.After recharging SVIP,you can read all the short stories inthe SVIP section during the validity period;{'\n'}
-        4.If the account is not available for along time afterrecharging SVIP,please click here to contact us. We willfollow up and help you;{'\n'}
-        5.Working time :Monday to Friday, 10AM - 10PM
+      <View className="p-4 bg-white mx-4 rounded-lg">
+        <Text className="text-base font-bold mb-2">Tips：</Text>
+        <Text className="text-sm text-gray-600 leading-5">
+          1.When you recharge SVIP,the system will automaticallyconvert the currency of your region for payment;{'\n'}
+          2.SVIP is a virtual commodity.Once it's recharged,it's non-refundable;{'\n'}
+          3.After recharging SVIP,you can read all the short stories inthe SVIP section during the validity period;{'\n'}
+          4.If the account is not available for along time afterrecharging SVIP,please click here to contact us. We willfollow up and help you;{'\n'}
+          5.Working time :Monday to Friday, 10AM - 10PM
         </Text>
       </View>
     </ScrollView>
   );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    backgroundColor: 'white',
-    padding: 20,
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-  },
-  benefitsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: 'white',
-    padding: 20,
-    marginTop: 12,
-    display: 'none',
-  },
-  benefitItem: {
-    alignItems: 'center',
-  },
-  benefitText: {
-    marginTop: 8,
-    color: '#333',
-  },
-  plansContainer: {
-    padding: 16,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  planCard: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 8,
-    marginBottom: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    elevation: 2,
-    width: '48%',
-  },
-  planLabel: {
-    fontSize: 18,
-    fontWeight: '500',
-  },
-  planPrice: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#FF629A',
-  },
-  noticeContainer: {
-    padding: 16,
-    backgroundColor: 'white',
-    margin: 16,
-    marginTop:0,
-    borderRadius: 8,
-  },
-  noticeTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  noticeText: {
-    fontSize: 14,
-    color: '#666',
-    lineHeight: 20,
-  },
-  cardElementWrapper: {
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 8,
-    padding: 12,
-  },
-}); 
+} 
