@@ -63,12 +63,13 @@ export default function Subscription() {
         }),
       });
 
-      const { clientSecret } = await response.json();
-      console.log('clientSecret', clientSecret);
+      const { data } = await response.json();
+      console.log('clientSecret', data.clientSecret);
+      console.log('subscriptionId', data.subscriptionId);
 
       // 2. 确认支付
       const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(
-        clientSecret,
+        data.clientSecret,
         {
           payment_method: {
             card: elements.getElement(CardElement)!,
@@ -81,28 +82,30 @@ export default function Subscription() {
         return;
       }
 
-      // if (paymentIntent.status === 'succeeded') {
-      //   // 3. 更新订阅状态
-      //   const { data, error } = await supabase
-      //     .from('subscriptions')
-      //     .insert([
-      //       {
-      //         user_id: (await supabase.auth.getUser()).data.user?.id,
-      //         plan_id: plan.id,
-      //         status: 'active',
-      //         start_date: new Date().toISOString(),
-      //         end_date: new Date(Date.now() + plan.days * 24 * 60 * 60 * 1000).toISOString(),
-      //       },
-      //     ]);
+      if (paymentIntent.status === 'succeeded') {
+        // 3. 更新订阅状态
+        const { data:subscriptionData, error } = await supabase
+          .from('subscriptions')
+          .insert([
+            {
+              user_id: (await supabase.auth.getUser()).data.user?.id,// 用户ID
+              email: (await supabase.auth.getUser()).data.user?.email,// 用户邮箱
+              plan_id: plan.id,// 订阅计划ID
+              status: 'active',// 订阅状态
+              start_date: new Date().toISOString(),// 开始日期
+              end_date: new Date(Date.now() + plan.days * 24 * 60 * 60 * 1000).toISOString(),// 结束日期
+              payment_intent_id: paymentIntent.id,// 支付意图ID
+            },
+          ]);
 
-      //   if (error) {
-      //     console.error('Error updating subscription:', error);
-      //     Alert.alert('Payment successful but failed to update subscription. Please contact support.');
-      //     return;
-      //   }
+        if (error) {
+          console.error('Error updating subscription:', error);
+          Alert.alert('Payment successful but failed to update subscription. Please contact support.');
+          return;
+        }
 
-      //   Alert.alert('Successfully subscribed!');
-      // }
+        Alert.alert('Successfully subscribed!');
+      }
     } catch (error) {
       console.error('Error:', error);
       Alert.alert('An error occurred during payment. Please try again.');
