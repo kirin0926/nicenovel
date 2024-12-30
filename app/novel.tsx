@@ -1,18 +1,18 @@
 import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  ScrollView, 
-  Pressable, 
-  SafeAreaView,
-  useWindowDimensions
+  View, //视图
+  Text, //文本
+  StyleSheet, //样式
+  ScrollView, //滚动视图
+  Pressable, //按钮
+  SafeAreaView,//安全区域
+  useWindowDimensions//获取屏幕宽度
 } from 'react-native';
 import RenderHtml from 'react-native-render-html';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { supabase } from '../lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { useEffect, useState } from 'react';
-import { Analytics } from '../services/analytics';
+import { Analytics } from '@/services/analytics';
 
 interface Chapter {
   id: string;
@@ -33,6 +33,7 @@ export default function ReadScreen() {
   const [pageEnterTime, setPageEnterTime] = useState<Date>(new Date());// 记录进入页面的时间
 
   useEffect(() => {
+    // 获取当前章节
     async function fetchChapters() {
       try {
         // 获取当前章节
@@ -74,7 +75,7 @@ export default function ReadScreen() {
         console.error('Error fetching chapters:', error);
       }
     }
-
+    // 获取当前章节
     fetchChapters();
   }, [id]);
 
@@ -119,6 +120,21 @@ export default function ReadScreen() {
     // 可以通过修改 URL 参数或其他方式实现
   };
 
+  // 添加内容预处理函数
+  const processContent = (content: string) => {
+    if (!content) return '';
+    return content
+      // 将换行符转换为 HTML 段落标签
+      .split('\n')
+      .filter(line => line.trim() !== '') // 过滤空行
+      .map(line => `<p>${line}</p>`)
+      .join('')
+      // 将 \" 转换为引号
+      .replace(/\\"/g, '"')
+      // 可以根据需要添加其他替换规则
+      .replace(/\\n/g, '<br/>');
+  };
+
   if (!chapter) {
     return (
       <SafeAreaView style={styles.container}>
@@ -150,15 +166,16 @@ export default function ReadScreen() {
       >
         <RenderHtml
           contentWidth={width}
-          source={{ html: chapter?.content || '' }}
+          source={{ html: processContent(chapter?.content || '') }}
           tagsStyles={{
             body: {
               fontSize: fontSize,
-              lineHeight: fontSize * 1.5,
+              lineHeight: fontSize * 1.7,
               color: '#333',
             },
             p: {
-              marginBottom: 10,
+              marginBottom: 16,
+              textAlign: 'justify',
             }
           }}
         />
