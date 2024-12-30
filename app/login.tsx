@@ -5,7 +5,6 @@
 // 4. 用户授权后，Google 会将结果返回给应用
 // 5. useEffect 监听 response 变化，当获取到成功响应时处理登录结果
 import {
-  StyleSheet,
   Text,
   View,
   TouchableOpacity,
@@ -14,18 +13,23 @@ import {
   Image
 } from 'react-native';
 import { router } from 'expo-router';
-// import { StatusBar } from 'expo-status-bar';
 import { FontAwesome } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
+// import * as AuthSession from 'expo-auth-session';
 import * as Google from 'expo-auth-session/providers/google';
 import { useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 // import * as AppleAuthentication from 'expo-auth-session/providers/apple';
 import { Analytics } from '@/services/analytics';
-import { getOrCreateUUID } from '@/services/uuid';
 
 // 确保在web浏览器完成身份验证后正确关闭
 WebBrowser.maybeCompleteAuthSession();
+
+// 添加重定向URI配置
+// const redirectUri = AuthSession.makeRedirectUri({
+//   scheme: 'nicenovel', // 替换为你的应用 scheme
+//   path: 'bookshelf',  // 可选，指定重定向路径
+// });
 
 export default function Login() {
   // useAuthRequest 钩子用于建 Google OAuth 请求 
@@ -45,8 +49,6 @@ export default function Login() {
   useEffect(() => {
     if (response?.type === 'success') {
       // console.log('response', response);
-      // const token = response.authentication?.accessToken as string;
-      // const idToken = response.authentication?.idToken as string;
       const idToken = response.params?.id_token as string;
       signInWithSupabase(idToken);
     }
@@ -71,41 +73,27 @@ export default function Login() {
       }
       
       // 检查数据库表中用户ID是否已存在
-      let { data: existingUser, error: userError } = await supabase
-        .from('user')
-        .select('user_id')
-        .eq('user_id', data.user.id)
-        .single();
-        console.log('existingUser', existingUser);
-        if (existingUser) {
-          console.log('User already exists');
-          //保存uuid到本地
-          return;
-        }
-
-      // 获取本地UUID
-      const localUUID = await getOrCreateUUID();
+      // let { data: existingUser, error: userError } = await supabase
+      //   .from('user')
+      //   .select('user_id')
+      //   .eq('user_id', data.user.id)
+      //   .single();
+      //   console.log('existingUser', existingUser);
+      //   if (existingUser) {
+      //     console.log('User already exists');
+      //     //保存uuid到本地
+      //     return;
+      //   }
 
       // 准备要更新的用户数据
-      const userData = {
-        user_id: data.user.id,
-        email: data.user.email,
-        full_name: data.user.user_metadata.full_name,
-        avatar_url: data.user.user_metadata.avatar_url,
-        provider: 'google',
-      };
+      // const userData = {
+      //   user_id: data.user.id,
+      //   email: data.user.email,
+      //   full_name: data.user.user_metadata.full_name,
+      //   avatar_url: data.user.user_metadata.avatar_url,
+      //   provider: 'google',
+      // };
 
-      // 更新user表
-      const { data: upsertData, error: upsertError } = await supabase
-      .from('user')// 更新user表
-      .update(userData)// 更新数据
-      .eq('uuid', localUUID)// 条件
-      .select()
-
-      if (upsertError) {
-        console.error('Error updating user table:', upsertError);
-      }
-      console.log('Supabase auth success: ok', upsertData);
       console.log('Supabase auth success: ok', data);
       router.back();
     } catch (error) {
@@ -121,13 +109,9 @@ export default function Login() {
       const result = await promptAsync();
       if (result.type === 'success') {
         console.log('Google login success');
-        Analytics.trackLogin('google', true);// 跟踪登录成功
-      } else {
-        Analytics.trackLogin('google', false, 'User cancelled or login failed');// 跟踪登录失败
-      }
+      } 
     } catch (error) {
       console.error('Google login error:', error);
-      Analytics.trackLogin('google', false, error instanceof Error ? error.message : 'Unknown error');// 跟踪登录失败
     }
   };
 
@@ -147,7 +131,7 @@ export default function Login() {
             resizeMode="contain"
           />
         </View> */}
-        <Text className="text-xl font-bold text-center mb-10">chiose login way</Text>
+        <Text className="text-2xl font-bold text-center mb-10">Nice Novel</Text>
         
         <TouchableOpacity 
           className="flex-row items-center justify-center p-4 rounded-lg mb-4 bg-[#FF629A]"

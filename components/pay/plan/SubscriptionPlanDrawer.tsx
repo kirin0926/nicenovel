@@ -1,4 +1,5 @@
-import { Text, View, TouchableOpacity, Alert } from 'react-native';
+import { Text, View, TouchableOpacity, } from 'react-native';
+import { useState, useEffect } from 'react';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import { stripePromise } from '@/app/_layout';
@@ -37,6 +38,13 @@ export default function SubscriptionPlanDrawer({
   setSelectedPlan,
   onSubscribe
 }: SubscriptionPlanDrawerProps) {
+  
+    useEffect(() => {
+        if (subscriptionPlans.length > 0 && !selectedPlan) {
+        setSelectedPlan(subscriptionPlans[0].id);
+        }
+    }, [subscriptionPlans, selectedPlan, setSelectedPlan]);
+
   return (
     <>
       {/* 订阅计划 */}
@@ -49,8 +57,9 @@ export default function SubscriptionPlanDrawer({
             }`}
             activeOpacity={0.9}
             onPress={() => {
-              setSelectedPlan(plan.id);
-              setShowDrawer(true);
+                // 设置选中计划
+                setSelectedPlan(plan.id);
+            //   setShowDrawer(true);
             }}>
             <View className="p-4 items-center">
               <Text className="text-base text-center mb-2 text-[#FF629A]">Read all SVIP stories</Text>

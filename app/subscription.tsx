@@ -80,37 +80,35 @@ export default function Subscription() {
       );
       console.log('paymentIntent', paymentIntent);
       if (stripeError) {
-        Alert.alert(`Payment failed: ${stripeError.message}`);
+        console.log('Payment failed stripeError:', stripeError);
         return;
       }
 
       if (paymentIntent.status === 'succeeded') {
         // 3. 更新订阅状态
-        const { data:subscriptionData, error } = await supabase
+        const { data: subscriptionData, error } = await supabase
           .from('subscriptions')
           .insert([
             {
-              user_id: (await supabase.auth.getUser()).data.user?.id,// 用户ID
-              email: (await supabase.auth.getUser()).data.user?.email,// 用户邮箱
-              plan_id: plan.id,// 订阅计划ID
-              status: 'active',// 订阅状态
-              start_date: new Date().toISOString(),// 开始日期
-              end_date: new Date(Date.now() + plan.days * 24 * 60 * 60 * 1000).toISOString(),// 结束日期
-              payment_intent_id: paymentIntent.id,// 支付意图ID
+              user_id: (await supabase.auth.getUser()).data.user?.id,
+              email: (await supabase.auth.getUser()).data.user?.email,
+              stripe_subscription_id: data.subscriptionId,
+              stripe_customer_id: data.customerId,
+              status: 'active',
+              plan_id: plan.id,
+              current_period_start: new Date().toISOString(),
+              current_period_end: new Date(Date.now() + plan.days * 24 * 60 * 60 * 1000).toISOString(),
             },
           ]);
 
         if (error) {
           console.error('Error updating subscription:', error);
-          Alert.alert('Payment successful but failed to update subscription. Please contact support.');
           return;
         }
-
-        Alert.alert('Successfully subscribed!');
+        console.log('subscriptionData', subscriptionData);
       }
     } catch (error) {
       console.error('Error:', error);
-      Alert.alert('An error occurred during payment. Please try again.');
     }
   };
 

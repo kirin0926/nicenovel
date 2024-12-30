@@ -2,9 +2,8 @@ import { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, Dimensions,ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
-import { supabase } from '../../lib/supabase';
-import { Analytics } from '../../services/analytics';
-import { getOrCreateUUID } from '../../services/uuid';
+import { supabase } from '@/lib/supabase';
+import { Analytics } from '@/services/analytics';
 
 const { width } = Dimensions.get('window');
 const COLUMN_WIDTH = (width - 32) / 2;
@@ -28,10 +27,6 @@ export default function Home() {
     Analytics.trackPageView('Home', {
       timestamp: new Date().toISOString(),
       numberOfNovels: novels.length
-    });
-    // 获取或创建用户UUID
-    getOrCreateUUID().then(uuid => {
-      console.log('Current UUID:', uuid);
     });
 
     fetchNovels();
