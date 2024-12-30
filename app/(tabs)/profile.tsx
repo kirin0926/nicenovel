@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
+import { Text, View, Image, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { useUser } from '@/lib/UserContext';
@@ -10,17 +10,17 @@ export default function Profile() {
 
   if (!isLoggedIn) {
     return (
-      <View style={styles.container}>
-        <View style={styles.loginContainer}>
+      <View className="flex-1 bg-[#f5f5f5]">
+        <View className="flex-1 justify-center items-center p-2.5">
           <TouchableOpacity
-            style={styles.loginButton}
+            className="bg-[#FF629A] px-10 py-4 rounded-lg mt-5"
             onPress={() => {
               Analytics.trackEvent('Login Button Click', {
                 source: 'profile_page'
               });
               router.push('/login');
             }}>
-            <Text style={styles.loginButtonText}>Login/Register</Text>
+            <Text className="text-white text-sm font-bold">Login/Register</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -35,14 +35,14 @@ export default function Profile() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Image source={{ uri: userData.avatar }} style={styles.avatar} />
-        <View style={styles.userInfo}>
-          <Text style={styles.nickname}>{userData.nickname}</Text>
-          <Text style={styles.userId} numberOfLines={1}>ID: {userData.id}</Text>
-          <View style={styles.vipBadge}>
-            <Text style={[styles.vipText, !userData.isVip && styles.nonVipText]}>
+    <View className="flex-1 bg-[#f5f5f5]">
+      <View className="bg-white p-4 flex-row items-center">
+        <Image source={{ uri: userData.avatar }} className="w-[60px] h-[60px] rounded-[40px]" />
+        <View className="ml-4">
+          <Text className="text-base font-bold mb-1">{userData.nickname}</Text>
+          <Text className="text-sm text-[#666] mb-1" numberOfLines={1}>ID: {userData.id}</Text>
+          <View className="flex-row items-center">
+            <Text className={`ml-1 text-sm ${userData.isVip ? 'text-[#FFD700]' : 'text-[#999]'}`}>
               {userData.isVip ? 'VIP' : 'nomal'}
             </Text>
           </View>
@@ -50,111 +50,16 @@ export default function Profile() {
       </View>
 
       <TouchableOpacity
-        style={styles.vipButton}
+        className="bg-[#FF629A] mx-5 my-5 p-4 rounded-lg flex-row justify-center items-center"
         onPress={() => router.push('/subscription')}>
-        {/* <FontAwesome name="diamond" size={24} color="white" style={styles.vipIcon} /> */}
-        <Text style={styles.vipButtonText}>Membership</Text>
+        <Text className="text-white text-sm font-bold">Membership</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={styles.logoutButton}
+        className="bg-[#f5f5f5] mx-5 mt-0 p-4 rounded-lg border border-[#ddd] justify-center items-center"
         onPress={signOut}>
-        <Text style={styles.logoutButtonText}>logout</Text>
+        <Text className="text-[#666] text-sm font-bold">logout</Text>
       </TouchableOpacity>
     </View>
   );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    backgroundColor: 'white',
-    padding: 15,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 40,
-  },
-  userInfo: {
-    marginLeft: 15,
-  },
-  nickname: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  userId: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 4,
-  },
-  vipBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  vipText: {
-    marginLeft: 4,
-    fontSize: 14,
-    color: '#FFD700',
-  },
-  nonVipText: {
-    color: '#999',
-  },
-  vipButton: {
-    backgroundColor: '#FF629A',
-    margin: 20,
-    padding: 15,
-    borderRadius: 8,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  vipIcon: {
-    marginRight: 8,
-  },
-  vipButtonText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  loginContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 10,
-  },
-  loginButton: {
-    backgroundColor: '#FF629A',
-    paddingHorizontal: 40,
-    paddingVertical: 15,
-    borderRadius: 8,
-    marginTop: 20,
-  },
-  loginButtonText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  logoutButton: {
-    backgroundColor: '#f5f5f5',
-    margin: 20,
-    marginTop: 0,
-    padding: 15,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  logoutButtonText: {
-    color: '#666',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-}); 
+} 

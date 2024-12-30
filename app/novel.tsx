@@ -1,20 +1,11 @@
-import { 
-  View, //视图
-  Text, //文本
-  StyleSheet, //样式
-  ScrollView, //滚动视图
-  Pressable, //按钮
-  SafeAreaView,//安全区域
-  useWindowDimensions//获取屏幕宽度
-} from 'react-native';
+import { View,Text,ScrollView,Pressable,SafeAreaView,useWindowDimensions} from 'react-native';
+import { useEffect, useState } from 'react';
 import RenderHtml from 'react-native-render-html';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
-import { useEffect, useState } from 'react';
 import { Analytics } from '@/services/analytics';
 import SubscriptionPlanDrawer from '@/components/pay/plan/SubscriptionPlanDrawer';
-import { api } from '@/services/api';
 
 interface Chapter {
   id: string;
@@ -25,40 +16,16 @@ interface Chapter {
 }
 
 export default function ReadScreen() {
-  const { id } = useLocalSearchParams();
-  const [showControls, setShowControls] = useState(true);
-  const [fontSize, setFontSize] = useState(18);
-  const [chapter, setChapter] = useState<Chapter | null>(null);
-  const [nextChapter, setNextChapter] = useState<Chapter | null>(null);
-  const [prevChapter, setPrevChapter] = useState<Chapter | null>(null);
+  const { id } = useLocalSearchParams();// 获取小说ID
+  const [fontSize, setFontSize] = useState(18);// 字体大小
+  const [chapter, setChapter] = useState<Chapter | null>(null);// 当前章节
   const { width } = useWindowDimensions(); // 获取屏幕宽度用于渲染HTML
   const [pageEnterTime, setPageEnterTime] = useState<Date>(new Date());// 记录进入页面的时间
-  const [isSubscribed, setIsSubscribed] = useState(false);
-  const [showSubscriptionDrawer, setShowSubscriptionDrawer] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-  const [subscriptionPlans, setSubscriptionPlans] = useState<Array<{
-    id: string;
-    days: number;
-    price: number;
-    label: string;
-  }>>([]);
-
-  // 获取订阅计划
-  useEffect(() => {
-    async function fetchPlans() {
-      const { data: stripe_prices, error } = await api.getSubscriptionPlans();
-      if (!error && stripe_prices) {
-        const formattedPlans = stripe_prices.map(plan => ({
-          id: plan.price_id,
-          days: plan.days,
-          price: plan.unit_amount / 100,
-          label: plan.nickname
-        }));
-        setSubscriptionPlans(formattedPlans);
-      }
-    }
-    fetchPlans();
-  }, []);
+  const [isSubscribed, setIsSubscribed] = useState(false);// 是否订阅
+  const [showControls, setShowControls] = useState(true);// 是否显示控制按钮
+  const [nextChapter, setNextChapter] = useState<Chapter | null>(null);// 下一章节
+  const [prevChapter, setPrevChapter] = useState<Chapter | null>(null);// 上一章节
+  
 
   // 检查订阅状态
   useEffect(() => {
@@ -78,16 +45,6 @@ export default function ReadScreen() {
     // checkSubscription();
   }, []);
 
-  // 处理订阅操作
-  const handleSubscribe = async (plan: any) => {
-    try {
-      // 这里添加您的订阅处理逻辑
-      setIsSubscribed(true);
-      setShowSubscriptionDrawer(false);
-    } catch (error) {
-      console.error('Subscription error:', error);
-    }
-  };
 
   useEffect(() => {
     // 获取当前章节
@@ -202,31 +159,30 @@ export default function ReadScreen() {
 
   if (!chapter) {
     return (
-      <SafeAreaView style={styles.container}>
-        {/* Loading... */}
+      <SafeAreaView className="flex-1 bg-white">
         <Text></Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={[styles.controlsContainer, !showControls && styles.hidden]}>
-        <View style={styles.header}>
-          <Pressable style={styles.backButton} onPress={handleBack}>
+    <SafeAreaView className="flex-1 bg-white">
+      <View className={`${!showControls && 'opacity-0 h-0'}`}>
+        <View className="flex-row items-center p-2.5 bg-white border-b border-[#eee]">
+          <Pressable className="p-1" onPress={handleBack}>
             <Ionicons name="chevron-back" size={24} color="#333" />
           </Pressable>
-          <Text style={styles.title} numberOfLines={1}>
+          <Text className="flex-1 text-base font-bold text-center mx-4" numberOfLines={1}>
             {chapter.title}
           </Text>
-          <Pressable style={styles.settingsButton}>
+          <Pressable className="p-1">
             <Ionicons name="settings-outline" size={24} color="#333" />
           </Pressable>
         </View>
       </View>
 
       <ScrollView 
-        style={styles.content}
+        className="flex-1 p-4"
         onTouchStart={toggleControls}
       >
         <RenderHtml
@@ -254,173 +210,44 @@ export default function ReadScreen() {
               </Text>
               <View className="flex-1 h-[1px] border border-dashed border-gray-300 mx-2.5" />
             </View>
-            <SubscriptionPlanDrawer
-              subscriptionPlans={subscriptionPlans}
-              selectedPlan={selectedPlan}
-              showDrawer={showSubscriptionDrawer}
-              setShowDrawer={setShowSubscriptionDrawer}
-              setSelectedPlan={setSelectedPlan}
-              onSubscribe={handleSubscribe}
-            />
-            <Pressable 
-              className="bg-[#FF629A] p-4 rounded-lg mx-4 my-5"
-              onPress={() => setShowSubscriptionDrawer(true)}
-            >
-              <Text className="text-white text-center text-base font-bold">
-                Subscribe to Continue Reading
-              </Text>
-            </Pressable>
+            
+            <SubscriptionPlanDrawer />
           </View>
         )}
       </ScrollView>
       
-      <View style={[styles.controlsContainer, !showControls && styles.hidden]}>
-        <View style={styles.footer}>
+      <View className={`${!showControls && 'opacity-0 h-0'}`}>
+        <View className="hidden flex-row justify-between items-center p-4 bg-white border-t border-[#eee]">
           <Pressable 
-            style={[styles.navButton, !prevChapter && styles.disabledButton]}
+            className={`py-2 px-4 rounded ${!prevChapter ? 'bg-gray-400' : 'bg-[#007AFF]'}`}
             disabled={!prevChapter}
             onPress={() => prevChapter && navigateToChapter(prevChapter.id)}
           >
-            <Text style={styles.navButtonText}>上一章</Text>
+            <Text className="text-white text-sm">上一章</Text>
           </Pressable>
-          <View style={styles.fontControls}>
+          <View className="flex-row items-center">
             <Pressable 
-              style={styles.fontButton}
+              className="p-2 mx-2 bg-gray-100 rounded"
               onPress={() => setFontSize(Math.max(14, fontSize - 2))}
             >
-              <Text style={styles.fontButtonText}>A-</Text>
+              <Text className="text-sm text-[#333]">A-</Text>
             </Pressable>
             <Pressable 
-              style={styles.fontButton}
+              className="p-2 mx-2 bg-gray-100 rounded"
               onPress={() => setFontSize(Math.min(24, fontSize + 2))}
             >
-              <Text style={styles.fontButtonText}>A+</Text>
+              <Text className="text-sm text-[#333]">A+</Text>
             </Pressable>
           </View>
           <Pressable 
-            style={[styles.navButton, !nextChapter && styles.disabledButton]}
+            className={`py-2 px-4 rounded ${!nextChapter ? 'bg-gray-400' : 'bg-[#007AFF]'}`}
             disabled={!nextChapter}
             onPress={() => nextChapter && navigateToChapter(nextChapter.id)}
           >
-            <Text style={styles.navButtonText}>下一章</Text>
+            <Text className="text-white text-sm">下一章</Text>
           </Pressable>
         </View>
       </View>
-
-      
     </SafeAreaView>
   );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  controlsContainer: {
-    opacity: 1,
-  },
-  hidden: {
-    opacity: 0,
-    height: 0,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  backButton: {
-    padding: 4,
-  },
-  title: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginHorizontal: 16,
-  },
-  settingsButton: {
-    padding: 4,
-  },
-  content: {
-    flex: 1,
-    padding: 16,
-  },
-  contentText: {
-    lineHeight: 28,
-    color: '#333',
-  },
-  footer: {
-    display: 'none',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: 'white',
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-  },
-  navButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    backgroundColor: '#007AFF',
-    borderRadius: 4,
-  },
-  navButtonText: {
-    color: 'white',
-    fontSize: 14,
-  },
-  disabledButton: {
-    backgroundColor: '#ccc',
-  },
-  fontControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  fontButton: {
-    padding: 8,
-    marginHorizontal: 8,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 4,
-  },
-  fontButtonText: {
-    fontSize: 14,
-    color: '#333',
-  },
-  subscribeButton: {
-    backgroundColor: '#FF629A',
-    padding: 16,
-    borderRadius: 8,
-    marginVertical: 20,
-    marginHorizontal: 16,
-  },
-  subscribeButtonText: {
-    color: 'white',
-    textAlign: 'center',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  subscribeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-    marginVertical: 20,
-  },
-  dashedLine: {
-    flex: 1,
-    height: 1,
-    borderStyle: 'dashed',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    marginHorizontal: 10,
-  },
-  subscribeText: {
-    color: '#666',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-}); 
+} 
