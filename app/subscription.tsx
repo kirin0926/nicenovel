@@ -4,7 +4,18 @@ import { supabase } from '../lib/supabase';
 import { useState, useEffect } from 'react';
 import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 
+import {
+  Drawer,
+  DrawerBackdrop,
+  DrawerContent,
+  DrawerHeader,
+  DrawerCloseButton,
+  DrawerBody,
+  DrawerFooter,
+} from "@/components/ui/drawer"
+
 export default function Subscription() {
+  const [showDrawer, setShowDrawer] = useState(false)
   const [subscriptionPlans, setSubscriptionPlans] = useState<Array<{
     id: string;
     days: number;
@@ -141,12 +152,28 @@ export default function Subscription() {
             key={plan.id}
             style={styles.planCard}
             activeOpacity={0.9}
-            onPress={() => handleSubscribe(plan)}>
+            onPress={() => setShowDrawer(true)}>
+              {/* handleSubscribe(plan) */}
             <Text style={styles.planLabel}>{plan.label}</Text>
             <Text style={styles.planPrice}>${plan.price}</Text>
           </TouchableOpacity>
         ))}
       </View>
+
+      <Drawer 
+        isOpen={showDrawer} 
+        onClose={() => setShowDrawer(false)} 
+        size="md"
+        anchor="bottom">
+        <DrawerBackdrop />
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerCloseButton></DrawerCloseButton>
+          </DrawerHeader>
+          <DrawerBody />
+          <DrawerFooter />
+        </DrawerContent>
+      </Drawer>
 
       <View style={styles.cardElementContainer}>
         <CardElement
