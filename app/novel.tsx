@@ -13,6 +13,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
 import { useEffect, useState } from 'react';
 import { Analytics } from '@/services/analytics';
+import SubscriptionPlanDrawer from '@/components/pay/plan/SubscriptionPlanDrawer';
+import { api } from '@/services/api';
 
 interface Chapter {
   id: string;
@@ -31,6 +33,61 @@ export default function ReadScreen() {
   const [prevChapter, setPrevChapter] = useState<Chapter | null>(null);
   const { width } = useWindowDimensions(); // 获取屏幕宽度用于渲染HTML
   const [pageEnterTime, setPageEnterTime] = useState<Date>(new Date());// 记录进入页面的时间
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [showSubscriptionDrawer, setShowSubscriptionDrawer] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [subscriptionPlans, setSubscriptionPlans] = useState<Array<{
+    id: string;
+    days: number;
+    price: number;
+    label: string;
+  }>>([]);
+
+  // 获取订阅计划
+  useEffect(() => {
+    async function fetchPlans() {
+      const { data: stripe_prices, error } = await api.getSubscriptionPlans();
+      if (!error && stripe_prices) {
+        const formattedPlans = stripe_prices.map(plan => ({
+          id: plan.price_id,
+          days: plan.days,
+          price: plan.unit_amount / 100,
+          label: plan.nickname
+        }));
+        setSubscriptionPlans(formattedPlans);
+      }
+    }
+    fetchPlans();
+  }, []);
+
+  // 检查订阅状态
+  useEffect(() => {
+    async function checkSubscription() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      
+      const { data: subscription } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+      
+      setIsSubscribed(!!subscription);
+    }
+    
+    // checkSubscription();
+  }, []);
+
+  // 处理订阅操作
+  const handleSubscribe = async (plan: any) => {
+    try {
+      // 这里添加您的订阅处理逻辑
+      setIsSubscribed(true);
+      setShowSubscriptionDrawer(false);
+    } catch (error) {
+      console.error('Subscription error:', error);
+    }
+  };
 
   useEffect(() => {
     // 获取当前章节
@@ -120,19 +177,27 @@ export default function ReadScreen() {
     // 可以通过修改 URL 参数或其他方式实现
   };
 
-  // 添加内容预处理函数
+  // 修改 processContent 函数来限制内容
   const processContent = (content: string) => {
     if (!content) return '';
-    return content
-      // 将换行符转换为 HTML 段落标签
+    
+    let processedContent = content
       .split('\n')
-      .filter(line => line.trim() !== '') // 过滤空行
+      .filter(line => line.trim() !== '')
       .map(line => `<p>${line}</p>`)
       .join('')
-      // 将 \" 转换为引号
       .replace(/\\"/g, '"')
-      // 可以根据需要添加其他替换规则
       .replace(/\\n/g, '<br/>');
+
+    if (!isSubscribed) {
+      // 限制在3000字以内
+      const truncatedContent = processedContent.slice(0, 5000);
+      processedContent = `
+        ${truncatedContent}
+      `;
+    }
+
+    return processedContent;
   };
 
   if (!chapter) {
@@ -179,8 +244,36 @@ export default function ReadScreen() {
             }
           }}
         />
+        
+        {!isSubscribed && (
+          <View>
+            <View className="flex-row items-center justify-center px-4 my-5">
+              <View className="flex-1 h-[1px] border border-dashed border-gray-300 mx-2.5" />
+              <Text className="text-sm text-gray-600 font-medium">
+                Subscribe to Continue Reading Full Novel
+              </Text>
+              <View className="flex-1 h-[1px] border border-dashed border-gray-300 mx-2.5" />
+            </View>
+            <SubscriptionPlanDrawer
+              subscriptionPlans={subscriptionPlans}
+              selectedPlan={selectedPlan}
+              showDrawer={showSubscriptionDrawer}
+              setShowDrawer={setShowSubscriptionDrawer}
+              setSelectedPlan={setSelectedPlan}
+              onSubscribe={handleSubscribe}
+            />
+            <Pressable 
+              className="bg-[#FF629A] p-4 rounded-lg mx-4 my-5"
+              onPress={() => setShowSubscriptionDrawer(true)}
+            >
+              <Text className="text-white text-center text-base font-bold">
+                Subscribe to Continue Reading
+              </Text>
+            </Pressable>
+          </View>
+        )}
       </ScrollView>
-
+      
       <View style={[styles.controlsContainer, !showControls && styles.hidden]}>
         <View style={styles.footer}>
           <Pressable 
@@ -213,6 +306,8 @@ export default function ReadScreen() {
           </Pressable>
         </View>
       </View>
+
+      
     </SafeAreaView>
   );
 }
@@ -294,5 +389,38 @@ const styles = StyleSheet.create({
   fontButtonText: {
     fontSize: 14,
     color: '#333',
+  },
+  subscribeButton: {
+    backgroundColor: '#FF629A',
+    padding: 16,
+    borderRadius: 8,
+    marginVertical: 20,
+    marginHorizontal: 16,
+  },
+  subscribeButtonText: {
+    color: 'white',
+    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  subscribeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    marginVertical: 20,
+  },
+  dashedLine: {
+    flex: 1,
+    height: 1,
+    borderStyle: 'dashed',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    marginHorizontal: 10,
+  },
+  subscribeText: {
+    color: '#666',
+    fontSize: 14,
+    fontWeight: '500',
   },
 }); 

@@ -1,10 +1,11 @@
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity,Alert } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity,Alert,Pressable} from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { supabase } from '../lib/supabase';
 import { useState, useEffect } from 'react';
 import { useStripe, useElements, CardElement} from '@stripe/react-stripe-js';
 
 import SubscriptionPlanDrawer from '@/components/pay/plan/SubscriptionPlanDrawer';
+import { api } from '@/services/api';
 
 export default function Subscription() {
   const [showDrawer, setShowDrawer] = useState(false)
@@ -28,14 +29,9 @@ export default function Subscription() {
   // 获取订阅计划
   const fetchSubscriptionPlans = async () => {
     try {
-      
-      let { data: stripe_prices, error } = await supabase
-      .from('stripe_prices')
-      .select('*')
-              
+      const { data:stripe_prices, error } = await api.getSubscriptionPlans();
       if (error) throw error;
       if (!stripe_prices) return;
-      // console.log('stripe_prices', stripe_prices);
       const formattedPlans = stripe_prices.map(plan => ({
         id: plan.price_id,
         days: plan.days,
@@ -149,6 +145,14 @@ export default function Subscription() {
         setSelectedPlan={setSelectedPlan}
         onSubscribe={handleSubscribe}
       />
+      <Pressable 
+        className="bg-[#FF629A] p-4 rounded-lg mx-4 my-5"
+        onPress={() => setShowDrawer(true)}
+      >
+        <Text className="text-white text-center text-base font-bold">
+          Subscribe to Continue Reading
+        </Text>
+      </Pressable>
 
       <View className="p-4 bg-white mx-4 rounded-lg">
         <Text className="text-base font-bold mb-2">Tips：</Text>

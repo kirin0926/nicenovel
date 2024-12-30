@@ -45,7 +45,7 @@ export default function SubscriptionPlanDrawer({
           <TouchableOpacity
             key={plan.id}
             className={`bg-white rounded-xl w-[48%] overflow-hidden border ${
-              selectedPlan === plan.id ? 'border-[#FF629A] border-2 bg-[#FFF5F8]' : 'border-white'
+              selectedPlan === plan.id ? 'border-[#FF629A] border-2 bg-[#FFF5F8]' : 'border-[#f2f2f2]'
             }`}
             activeOpacity={0.9}
             onPress={() => {
