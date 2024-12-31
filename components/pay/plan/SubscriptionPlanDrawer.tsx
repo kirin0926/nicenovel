@@ -1,8 +1,6 @@
 import { Text, View, TouchableOpacity, Pressable } from 'react-native';
 import { useState, useEffect } from 'react';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { Elements } from '@stripe/react-stripe-js';
-import { stripePromise } from '@/app/_layout';
 import { supabase } from '@/lib/supabase';
 import { api } from '@/services/api';
 import {
@@ -19,10 +17,13 @@ type Plan = {
   id: string;
   days: number;
   price: number;
-  label: string;
 };
 
-export default function SubscriptionPlanDrawer() {
+interface SubscriptionPlanDrawerProps {
+  onSubscriptionSuccess?: () => void;
+}
+
+export default function SubscriptionPlanDrawer({ onSubscriptionSuccess }: SubscriptionPlanDrawerProps) {
   const [showDrawer, setShowDrawer] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [subscriptionPlans, setSubscriptionPlans] = useState<Plan[]>([]);
@@ -48,11 +49,10 @@ export default function SubscriptionPlanDrawer() {
       if (!stripe_prices) return;
       const formattedPlans = stripe_prices.map(plan => ({
         id: plan.price_id,
-        days: plan.days,
+        days: plan.interval_count,
         price: plan.unit_amount / 100,
-        label: `${plan.nickname}`
       }));
-
+      // console.log('formattedPlans:', formattedPlans);
       setSubscriptionPlans(formattedPlans);
     } catch (error) {
       console.error('Error fetching subscription plans:', error);
@@ -61,9 +61,17 @@ export default function SubscriptionPlanDrawer() {
 
   // 订阅按钮
   const handleSubscribe = async (plan: Plan) => {
+    console.log('plan:', plan);
     if (!stripe || !elements) {
       alert('Stripe has not been initialized');
+      console.log('stripe:', stripe);
+      console.log('elements:', elements);
       return;
+    }
+    const cardElement = elements.getElement(CardElement);
+    if (!cardElement) {
+        console.error('CardElement has not been found.');
+        return;
     }
 
     try {
@@ -80,7 +88,7 @@ export default function SubscriptionPlanDrawer() {
       });
 
       const { data } = await response.json();
-
+      console.log('data:', data);
       // 2. 确认支付
       const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(
         data.clientSecret,
@@ -90,7 +98,7 @@ export default function SubscriptionPlanDrawer() {
           },
         }
       );
-
+      console.log('paymentIntent:', paymentIntent);
       if (stripeError) {
         console.log('Payment failed stripeError:', stripeError);
         return;
@@ -108,8 +116,8 @@ export default function SubscriptionPlanDrawer() {
               stripe_customer_id: data.customerId,
               status: 'active',
               plan_id: plan.id,
-              current_period_start: new Date().toISOString(),
-              current_period_end: new Date(Date.now() + plan.days * 24 * 60 * 60 * 1000).toISOString(),
+              current_period_start: new Date().toISOString(), // 转换为 ISO 字符串格式
+              current_period_end: new Date(Date.now() + (plan.days * 24 * 60 * 60 * 1000)).toISOString(), // 转换为 ISO 字符串格式
             },
           ]);
 
@@ -118,8 +126,10 @@ export default function SubscriptionPlanDrawer() {
           return;
         }
         
-        // 成功后关闭抽屉
-        setShowDrawer(false);
+        if (!error) {
+          onSubscriptionSuccess?.();
+          setShowDrawer(false);
+        }
       }
     } catch (error) {
       console.error('Error:', error);
@@ -145,7 +155,7 @@ export default function SubscriptionPlanDrawer() {
                 selectedPlan === plan.id 
                 ? 'bg-[#FF629A] text-white' 
                 : 'bg-[#FFE5EE] text-[#FF629A]'
-              }`}>{plan.label}</Text>
+              }`}>{plan.days} days</Text>
             </View>
           </TouchableOpacity>
         ))}
@@ -177,34 +187,33 @@ export default function SubscriptionPlanDrawer() {
             </DrawerCloseButton>
           </DrawerHeader>
           <DrawerBody>
-            <Elements stripe={stripePromise}>
-              <View className="border border-gray-200 rounded-lg p-3">
-                <CardElement
-                  options={{
-                    style: {
-                      base: {
-                        fontSize: '16px',
-                        color: '#424770',
-                        '::placeholder': {
-                          color: '#aab7c4',
-                        },
-                      },
-                      invalid: {
-                        color: '#9e2146',
+            <View className="border border-gray-200 rounded-lg p-3">
+              <Text className="text-base font-bold mb-2">Payment Method</Text>
+              <CardElement
+                options={{
+                  style: {
+                    base: {
+                      fontSize: '16px',
+                      color: '#424770',
+                      '::placeholder': {
+                        color: '#aab7c4',
                       },
                     },
-                  }}
-                />
-              </View>
-              <TouchableOpacity 
-                className="bg-red-500 mt-6 p-4 rounded-md" 
-                onPress={() => {
-                  const plan = subscriptionPlans.find(p => p.id === selectedPlan);
-                  if (plan) handleSubscribe(plan);
-                }}>
-                <Text className="text-white text-center font-bold">SVIP Member Recharge</Text>
-              </TouchableOpacity>
-            </Elements>
+                    invalid: {
+                      color: '#9e2146',
+                    },
+                  },
+                }}
+              />
+            </View>
+            <TouchableOpacity 
+              className="bg-red-500 mt-6 p-4 rounded-md" 
+              onPress={() => {
+                const plan = subscriptionPlans.find(p => p.id === selectedPlan);
+                if (plan) handleSubscribe(plan);
+              }}>
+              <Text className="text-white text-center font-bold">SVIP Member Recharge</Text>
+            </TouchableOpacity>
           </DrawerBody>
           <DrawerFooter />
         </DrawerContent>

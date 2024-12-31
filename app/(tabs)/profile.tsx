@@ -3,9 +3,28 @@ import { router } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { useUser } from '@/lib/UserContext';
 import { Analytics } from '@/services/analytics';
+import { api } from '@/services/api';
+import { useState, useEffect } from 'react';
 
 export default function Profile() {
   const { user, signOut } = useUser();
+  const [isVip, setIsVip] = useState(false);
+  const [expiryDate, setExpiryDate] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function checkVipStatus() {
+      if (!user) return;
+      const { data: subscription } = await api.checkSubscriptionStatus(user.id);
+      setIsVip(!!subscription);
+      // console.log('subscription:', subscription);
+      if (subscription?.current_period_end) {
+        setExpiryDate(new Date(subscription.current_period_end).toLocaleDateString());
+      }
+    }
+
+    checkVipStatus();
+  }, [user]);
+
   const isLoggedIn = !!user;
 
   if (!isLoggedIn) {
@@ -31,7 +50,8 @@ export default function Profile() {
     id: user.id,
     nickname: user.user_metadata?.full_name || '用户' + user.id.slice(0, 6),
     avatar: user.user_metadata?.avatar_url || 'https://picsum.photos/200',
-    isVip: user.user_metadata?.isVip || false,
+    isVip: isVip,
+    expiryDate: expiryDate,
   };
 
   return (
@@ -42,9 +62,14 @@ export default function Profile() {
           <Text className="text-base font-bold mb-1">{userData.nickname}</Text>
           <Text className="text-sm text-[#666] mb-1" numberOfLines={1}>ID: {userData.id}</Text>
           <View className="flex-row items-center">
-            <Text className={`ml-1 text-sm ${userData.isVip ? 'text-[#FFD700]' : 'text-[#999]'}`}>
-              {userData.isVip ? 'VIP' : 'nomal'}
+            <Text className={`ml-1 text-sm ${userData.isVip ? 'text-[#FF629A]' : 'text-[#999]'}`}>
+              {userData.isVip ? 'SVIP' : 'normal'}
             </Text>
+            {userData.isVip && userData.expiryDate && (
+              <Text className="ml-2 text-xs text-[#FF629A]">
+                End time: {userData.expiryDate}
+              </Text>
+            )}
           </View>
         </View>
       </View>

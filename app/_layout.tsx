@@ -16,7 +16,8 @@ export const stripePromise = loadStripe('pk_test_51PBXHTDISTrmdpg8Px0ZFxMz42kbz2
 
 export default function RootLayout() {
   return (
-    <GluestackUIProvider mode="light"><Elements stripe={stripePromise}>
+    <Elements stripe={stripePromise}>
+      <GluestackUIProvider mode="light">
         <UserProvider>
           <StatusBar style="dark"/>
           <Stack
@@ -36,26 +37,27 @@ export default function RootLayout() {
             <Stack.Screen
               name="(tabs)"
               options={{
-                headerShown: false,// 隐藏顶部导航栏
+                headerShown: false,
               }}
             />
             <Stack.Screen
               name="novel"
               options={{
                 title: 'detail',
-                headerShown: false,// 隐藏顶部导航栏
-                presentation: 'card',// 设置为card，可以设置背景颜色
-                headerTitleAlign: 'center',// 设置标题居中
+                headerShown: false,
+                presentation: 'card',
+                headerTitleAlign: 'center',
               }}
             />
             <Stack.Screen
               name="login"
               options={{
-                headerShown: true,// 隐藏顶部导航栏
+                headerShown: true,
               }}
             />
           </Stack>
         </UserProvider>
-      </Elements></GluestackUIProvider>
+      </GluestackUIProvider>
+    </Elements>
   );
 }

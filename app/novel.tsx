@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
 import { Analytics } from '@/services/analytics';
 import SubscriptionPlanDrawer from '@/components/pay/plan/SubscriptionPlanDrawer';
+import { api } from '@/services/api';
 
 interface Chapter {
   id: string;
@@ -31,18 +32,16 @@ export default function ReadScreen() {
   useEffect(() => {
     async function checkSubscription() {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        setIsSubscribed(false);
+        return;
+      }
       
-      const { data: subscription } = await supabase
-        .from('subscriptions')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-      
+      const { data: subscription } = await api.checkSubscriptionStatus(user.id);
       setIsSubscribed(!!subscription);
     }
     
-    // checkSubscription();
+    checkSubscription();
   }, []);
 
 

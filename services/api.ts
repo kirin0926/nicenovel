@@ -38,15 +38,15 @@ export const api = {
     return { data, error };
   },
   // 获取用户订阅状态
-  checkSubscriptionStatus:async (userId: string) => {
+  checkSubscriptionStatus: async (userId: string) => {
     const { data, error } = await supabase
       .from('subscriptions')
       .select('*')
-      .eq('user_id', userId)
-      .eq('status', 'active')
-      .gte('current_period_end', new Date().toISOString())
-      .single();
+      .eq('user_id', userId)// 用户id
+      .eq('status', 'active')// 状态
+      .gte('current_period_end', new Date().toISOString())// 结束时间
+      .single();// 单个
   
-    return {data, error};
+    return { data, error };
   },
 };

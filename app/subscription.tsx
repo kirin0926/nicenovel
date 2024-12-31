@@ -1,6 +1,8 @@
 import { StyleSheet, Text, View, ScrollView } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import SubscriptionPlanDrawer from '@/components/pay/plan/SubscriptionPlanDrawer';
+import { Elements } from '@stripe/react-stripe-js';
+import { stripePromise } from '@/app/_layout';
 
 export default function Subscription() {
   return (
@@ -10,6 +12,9 @@ export default function Subscription() {
         <Text className="text-2xl font-bold mt-4 mb-2">SVIP membership</Text>
         <Text className="text-base text-gray-600">SVIP members can read all novels for free.</Text>
       </View>
+
+      {/* <Elements stripe={stripePromise}>
+      </Elements> */}
 
       <SubscriptionPlanDrawer />
 
