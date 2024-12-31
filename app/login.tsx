@@ -12,7 +12,7 @@ import {
   SafeAreaView,
   Image
 } from 'react-native';
-import { router } from 'expo-router';
+import { router, usePathname } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
 // import * as AuthSession from 'expo-auth-session';
@@ -32,6 +32,7 @@ WebBrowser.maybeCompleteAuthSession();
 // });
 
 export default function Login() {
+  const pathname = usePathname();// 获取当前路径
   // useAuthRequest 钩子用于建 Google OAuth 请求 
   // useIdTokenAuthRequest 用于获取 id_token
   // request: OAuth 请求对象
@@ -95,7 +96,14 @@ export default function Login() {
       // };
 
       console.log('Supabase auth success: ok', data);
-      router.back();
+      if (router.canGoBack()) {
+        router.back();
+        setTimeout(() => {
+          if (pathname === '/novel') {
+            router.setParams({ checkSubscription: 'true' });// 检查订阅状态
+          }
+        }, 100);
+      }
     } catch (error) {
       console.error('Error signing in with Google:', error);
     }

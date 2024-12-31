@@ -12,6 +12,7 @@ import {
   DrawerBody,
   DrawerFooter,
 } from "@/components/ui/drawer"
+import { useRouter } from 'expo-router';
 
 type Plan = {
   id: string;
@@ -30,6 +31,7 @@ export default function SubscriptionPlanDrawer({ onSubscriptionSuccess }: Subscr
   
   const stripe = useStripe();
   const elements = useElements();
+  const router = useRouter();
 
   useEffect(() => {
     fetchSubscriptionPlans();
@@ -136,6 +138,18 @@ export default function SubscriptionPlanDrawer({ onSubscriptionSuccess }: Subscr
     }
   };
 
+  const handlePressSubscribe = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      // Redirect to login if user is not authenticated
+      router.push('/login');
+      return;
+    }
+
+    setShowDrawer(true);
+  };
+
   return (
     <>
       {/* 订阅计划 */}
@@ -164,7 +178,7 @@ export default function SubscriptionPlanDrawer({ onSubscriptionSuccess }: Subscr
       {/* 添加订阅按钮 */}
       <Pressable 
         className="bg-[#FF629A] p-4 rounded-lg mx-4 my-5"
-        onPress={() => setShowDrawer(true)}
+        onPress={handlePressSubscribe}
       >
         <Text className="text-white text-center text-base font-bold">
           SVIP Member Recharge

@@ -5,9 +5,12 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#FF629A',
-        headerShadowVisible: false,
-        headerTitleAlign: 'center',
+        tabBarActiveTintColor: '#FF629A',// 选中颜色
+        headerShadowVisible: false,// 隐藏顶部导航栏阴影
+        headerTitleAlign: 'center',// 设置标题居中
+        headerStyle: {
+          height: 55, // 设置导航栏高度
+        },
         tabBarStyle: {
           elevation: 0,  // Android 去除阴影
           shadowOpacity: 0, // iOS 去除阴影
@@ -38,7 +41,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="mine"
         options={{
           title: 'mine',
           tabBarIcon: ({ color, focused }) => (
