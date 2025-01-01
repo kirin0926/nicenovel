@@ -5,14 +5,14 @@ import { StatusBar } from 'expo-status-bar';
 import { UserProvider } from '@/lib/UserContext';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
+import { stripeKey } from '@/services/api';
 
 // 引入 analytics 服务
 import { initializeAnalytics } from '@/services/analytics';
 // 在应用启动时调用
 initializeAnalytics();
-
 // Initialize Stripe
-export const stripePromise = loadStripe('pk_test_51PBXHTDISTrmdpg8Px0ZFxMz42kbz2rQg2uiwnRt6HgAhLJrGeIpKShrHuiRk1wQCHwyTQYZVZnvBZiRZ5uBwmo2001GnjOGoD'); // Replace with your actual publishable key
+export const stripePromise = loadStripe(stripeKey!); // Replace with your actual publishable key
 
 export default function RootLayout() {
   return (

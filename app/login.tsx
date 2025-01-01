@@ -39,7 +39,7 @@ export default function Login() {
   // request: OAuth 请求对象
   // response: 授权响应结果
   // promptAsync: 触发授权流程的函数
-  console.log('redirectUri', redirectUri);
+  // console.log('redirectUri', redirectUri);
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
     androidClientId: "643989459317-9db0hp4bkr8i0ap0pfa4se9ah599i8ea.apps.googleusercontent.com",
     iosClientId: "643989459317-9db0hp4bkr8i0ap0pfa4se9ah599i8ea.apps.googleusercontent.com",

@@ -14,9 +14,12 @@ export default function Profile() {
   useEffect(() => {
     async function checkVipStatus() {
       if (!user) return;
-      const { data: subscription } = await api.checkSubscriptionStatus(user.id);
+      const { data: subscription, error } = await api.checkSubscriptionStatus(user.id);
       setIsVip(!!subscription);
-      // console.log('subscription:', subscription);
+      if (error) {
+        console.log('error:', error);
+        return;
+      }
       if (subscription?.current_period_end) {
         setExpiryDate(new Date(subscription.current_period_end).toLocaleDateString());
       }

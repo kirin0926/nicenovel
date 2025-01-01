@@ -2,7 +2,7 @@ import { Text, View, TouchableOpacity, Pressable } from 'react-native';
 import { useState, useEffect } from 'react';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { supabase } from '@/lib/supabase';
-import { api } from '@/services/api';
+import { api, backendapi } from '@/services/api';
 import {
   Drawer,
   DrawerBackdrop,
@@ -21,7 +21,7 @@ type Plan = {
 };
 
 interface SubscriptionPlanDrawerProps {
-  onSubscriptionSuccess?: () => void;
+  onSubscriptionSuccess?: () => void;// 订阅成功回调
 }
 
 export default function SubscriptionPlanDrawer({ onSubscriptionSuccess }: SubscriptionPlanDrawerProps) {
@@ -63,11 +63,8 @@ export default function SubscriptionPlanDrawer({ onSubscriptionSuccess }: Subscr
 
   // 订阅按钮
   const handleSubscribe = async (plan: Plan) => {
-    console.log('plan:', plan);
     if (!stripe || !elements) {
-      alert('Stripe has not been initialized');
-      console.log('stripe:', stripe);
-      console.log('elements:', elements);
+      console.log('Stripe has not been initialized');
       return;
     }
     const cardElement = elements.getElement(CardElement);
@@ -77,20 +74,14 @@ export default function SubscriptionPlanDrawer({ onSubscriptionSuccess }: Subscr
     }
 
     try {
-      // 1.创建支付意图
-      const response = await fetch('http://localhost:3000/create-subscription', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: (await supabase.auth.getUser()).data.user?.email,
-          priceId: plan.id,
-        }),
-      });
+      // 1.创建支付意图 - Using backendapi instead of direct fetch
+      const { data, error: subscriptionError } = await backendapi.createSubscription(plan);
+      
+      if (subscriptionError) {
+        console.error('Subscription creation failed:', subscriptionError);
+        return;
+      }
 
-      const { data } = await response.json();
-      console.log('data:', data);
       // 2. 确认支付
       const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(
         data.clientSecret,
@@ -112,12 +103,12 @@ export default function SubscriptionPlanDrawer({ onSubscriptionSuccess }: Subscr
           .from('subscriptions')
           .insert([
             {
-              user_id: (await supabase.auth.getUser()).data.user?.id,
-              email: (await supabase.auth.getUser()).data.user?.email,
-              stripe_subscription_id: data.subscriptionId,
-              stripe_customer_id: data.customerId,
-              status: 'active',
-              plan_id: plan.id,
+              user_id: (await supabase.auth.getUser()).data.user?.id,// 用户ID
+              email: (await supabase.auth.getUser()).data.user?.email,// 邮箱
+              stripe_subscription_id: data.subscriptionId,// 订阅ID
+              stripe_customer_id: data.customerId,// 客户ID
+              status: 'active',// 状态
+              plan_id: plan.id,// 计划ID
               current_period_start: new Date().toISOString(), // 转换为 ISO 字符串格式
               current_period_end: new Date(Date.now() + (plan.days * 24 * 60 * 60 * 1000)).toISOString(), // 转换为 ISO 字符串格式
             },
