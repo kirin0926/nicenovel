@@ -13,6 +13,7 @@ import {
   DrawerFooter,
 } from "@/components/ui/drawer"
 import { useRouter } from 'expo-router';
+import useStore from '@/store/useStore';
 
 type Plan = {
   id: string;
@@ -28,10 +29,10 @@ export default function SubscriptionPlanDrawer({ onSubscriptionSuccess }: Subscr
   const [showDrawer, setShowDrawer] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [subscriptionPlans, setSubscriptionPlans] = useState<Plan[]>([]);
-  
   const stripe = useStripe();
   const elements = useElements();
   const router = useRouter();
+  const setSubscription = useStore((state) => state.setSubscription);
 
   useEffect(() => {
     fetchSubscriptionPlans();
@@ -103,14 +104,14 @@ export default function SubscriptionPlanDrawer({ onSubscriptionSuccess }: Subscr
           .from('subscriptions')
           .insert([
             {
-              user_id: (await supabase.auth.getUser()).data.user?.id,// 用户ID
-              email: (await supabase.auth.getUser()).data.user?.email,// 邮箱
-              stripe_subscription_id: data.subscriptionId,// 订阅ID
-              stripe_customer_id: data.customerId,// 客户ID
-              status: 'active',// 状态
-              plan_id: plan.id,// 计划ID
-              current_period_start: new Date().toISOString(), // 转换为 ISO 字符串格式
-              current_period_end: new Date(Date.now() + (plan.days * 24 * 60 * 60 * 1000)).toISOString(), // 转换为 ISO 字符串格式
+              user_id: (await supabase.auth.getUser()).data.user?.id,
+              email: (await supabase.auth.getUser()).data.user?.email,
+              stripe_subscription_id: data.subscriptionId,
+              stripe_customer_id: data.customerId,
+              status: 'active',
+              plan_id: plan.id,
+              current_period_start: new Date().toISOString(),
+              current_period_end: new Date(Date.now() + (plan.days * 24 * 60 * 60 * 1000)).toISOString(),
             },
           ]);
 
@@ -120,8 +121,14 @@ export default function SubscriptionPlanDrawer({ onSubscriptionSuccess }: Subscr
         }
         
         if (!error) {
-          onSubscriptionSuccess?.();
-          setShowDrawer(false);
+          // 更新 Zustand store 中的订阅状态
+          setSubscription({
+            status: 'active',
+            expiryDate: new Date(Date.now() + (plan.days * 24 * 60 * 60 * 1000)).toISOString(),
+          });
+          
+          onSubscriptionSuccess?.();// 订阅成功回调
+          setShowDrawer(false);// 关闭弹出框
         }
       }
     } catch (error) {

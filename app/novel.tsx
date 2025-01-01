@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
 import { Analytics } from '@/services/analytics';
 import SubscriptionPlanDrawer from '@/components/pay/plan/SubscriptionPlanDrawer';
-import { api } from '@/services/api';
+import useStore from '@/store/useStore';
 
 interface Chapter {
   id: string;
@@ -22,28 +22,13 @@ export default function ReadScreen() {
   const [chapter, setChapter] = useState<Chapter | null>(null);// 当前章节
   const { width } = useWindowDimensions(); // 获取屏幕宽度用于渲染HTML
   const [pageEnterTime, setPageEnterTime] = useState<Date>(new Date());// 记录进入页面的时间
-  const [isSubscribed, setIsSubscribed] = useState(false);// 是否订阅
   const [showControls, setShowControls] = useState(true);// 是否显示控制按钮
   const [nextChapter, setNextChapter] = useState<Chapter | null>(null);// 下一章节
   const [prevChapter, setPrevChapter] = useState<Chapter | null>(null);// 上一章节
   
-
-  // 检查订阅状态
-  useEffect(() => {
-    async function checkSubscription() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setIsSubscribed(false);
-        return;
-      }
-      
-      const { data: subscription } = await api.checkSubscriptionStatus(user.id);
-      setIsSubscribed(!!subscription);
-    }
-    
-    checkSubscription();
-  }, []);
-
+  // 使用 Zustand store 的订阅状态
+  const subscription = useStore((state) => state.subscription);
+  const isSubscribed = subscription?.status === 'active';
 
   useEffect(() => {
     // 获取当前章节

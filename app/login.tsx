@@ -22,6 +22,7 @@ import { supabase } from '@/lib/supabase';
 // import * as AppleAuthentication from 'expo-auth-session/providers/apple';
 import { Analytics } from '@/services/analytics';
 import { makeRedirectUri } from 'expo-auth-session';
+import useStore from '@/store/useStore';
 
 // 确保在web浏览器完成身份验证后正确关闭
 WebBrowser.maybeCompleteAuthSession();
@@ -34,6 +35,8 @@ const redirectUri = makeRedirectUri({
 
 export default function Login() {
   const pathname = usePathname();// 获取当前路径
+  const setUser = useStore((state) => state.setUser);
+  const checkSubscriptionStatus = useStore((state) => state.checkSubscriptionStatus);
   // useAuthRequest 钩子用于建 Google OAuth 请求 
   // useIdTokenAuthRequest 用于获取 id_token
   // request: OAuth 请求对象
@@ -76,6 +79,12 @@ export default function Login() {
         return;
       }
       
+      // 更新 Zustand store
+      if (data.user) {
+        setUser(data.user);
+        checkSubscriptionStatus(data.user.id);
+      }
+      
       if (router.canGoBack()) {
         router.back();
         setTimeout(() => {
@@ -84,6 +93,7 @@ export default function Login() {
           }
         }, 100);
       }
+      console.log('data:', data);
     } catch (error) {
       console.error('Error signing in with Google:', error);
     }

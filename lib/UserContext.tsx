@@ -18,7 +18,6 @@ const UserContext = createContext<UserContextType>({
   user: null,
   signOut: async () => {},
 });
-
 // UserProvider 组件：用于包装整个应用，提供用户状态管理
 // children 参数使用 React.ReactNode 类型，表示可以接收任何有效的 React 子元素
 export function UserProvider({ children }: { children: React.ReactNode }) {
@@ -78,7 +77,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     </UserContext.Provider>
   );
 }
-
 // 自定义 Hook：方便在其他组件中获取用户状态
 // 使用 useContext 获取 UserContext 中的值
-export const useUser = () => useContext(UserContext); 
+export const useUser = () => useContext(UserContext);

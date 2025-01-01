@@ -1,36 +1,23 @@
 import { Text, View, Image, TouchableOpacity } from 'react-native';
+import { useEffect } from 'react';
 import { router } from 'expo-router';
-import { FontAwesome } from '@expo/vector-icons';
-import { useUser } from '@/lib/UserContext';
 import { Analytics } from '@/services/analytics';
-import { api } from '@/services/api';
-import { useState, useEffect } from 'react';
+import useStore from '@/store/useStore';
 
 export default function Profile() {
-  const { user, signOut } = useUser();
-  const [isVip, setIsVip] = useState(false);
-  const [expiryDate, setExpiryDate] = useState<string | null>(null);
+  const user = useStore((state) => state.user);
+  const subscription = useStore((state) => state.subscription);
+  const logout = useStore((state) => state.logout);
+  const checkSubscriptionStatus = useStore((state) => state.checkSubscriptionStatus);
 
   useEffect(() => {
-    async function checkVipStatus() {
-      if (!user) return;
-      const { data: subscription, error } = await api.checkSubscriptionStatus(user.id);
-      setIsVip(!!subscription);
-      if (error) {
-        console.log('error:', error);
-        return;
-      }
-      if (subscription?.current_period_end) {
-        setExpiryDate(new Date(subscription.current_period_end).toLocaleDateString());
-      }
+    console.log('user:', user);
+    if (user) {
+      checkSubscriptionStatus(user.id);
     }
-
-    checkVipStatus();
   }, [user]);
 
-  const isLoggedIn = !!user;
-
-  if (!isLoggedIn) {
+  if (!user) {
     return (
       <View className="flex-1 bg-[#f5f5f5]">
         <View className="flex-1 justify-center items-center p-2.5">
@@ -53,8 +40,8 @@ export default function Profile() {
     id: user.id,
     nickname: user.user_metadata?.full_name || '用户' + user.id.slice(0, 6),
     avatar: user.user_metadata?.avatar_url || 'https://picsum.photos/200',
-    isVip: isVip,
-    expiryDate: expiryDate,
+    isVip: subscription?.status === 'active',
+    expiryDate: subscription?.expiryDate,
   };
 
   return (
@@ -70,7 +57,7 @@ export default function Profile() {
             </Text>
             {userData.isVip && userData.expiryDate && (
               <Text className="ml-2 text-xs text-[#FF629A]">
-                End time: {userData.expiryDate}
+                End time: {new Date(userData.expiryDate).toLocaleDateString()}
               </Text>
             )}
           </View>
@@ -85,9 +72,9 @@ export default function Profile() {
 
       <TouchableOpacity
         className="bg-[#f5f5f5] mx-5 mt-0 p-4 rounded-lg border border-[#ddd] justify-center items-center"
-        onPress={signOut}>
+        onPress={logout}>
         <Text className="text-[#666] text-sm font-bold">logout</Text>
       </TouchableOpacity>
     </View>
   );
-} 
+}
