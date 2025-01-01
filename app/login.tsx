@@ -73,29 +73,6 @@ export default function Login() {
         return;
       }
       
-      // 检查数据库表中用户ID是否已存在
-      // let { data: existingUser, error: userError } = await supabase
-      //   .from('user')
-      //   .select('user_id')
-      //   .eq('user_id', data.user.id)
-      //   .single();
-      //   console.log('existingUser', existingUser);
-      //   if (existingUser) {
-      //     console.log('User already exists');
-      //     //保存uuid到本地
-      //     return;
-      //   }
-
-      // 准备要更新的用户数据
-      // const userData = {
-      //   user_id: data.user.id,
-      //   email: data.user.email,
-      //   full_name: data.user.user_metadata.full_name,
-      //   avatar_url: data.user.user_metadata.avatar_url,
-      //   provider: 'google',
-      // };
-
-      console.log('Supabase auth success: ok', data);
       if (router.canGoBack()) {
         router.back();
         setTimeout(() => {

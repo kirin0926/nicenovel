@@ -9,7 +9,7 @@ export default function TabLayout() {
         headerShadowVisible: false,// 隐藏顶部导航栏阴影
         headerTitleAlign: 'center',// 设置标题居中
         headerStyle: {
-          height: 55, // 设置导航栏高度
+          height: 53, // 设置导航栏高度
         },
         tabBarStyle: {
           elevation: 0,  // Android 去除阴影
