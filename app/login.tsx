@@ -21,15 +21,16 @@ import { useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 // import * as AppleAuthentication from 'expo-auth-session/providers/apple';
 import { Analytics } from '@/services/analytics';
+import { makeRedirectUri } from 'expo-auth-session';
 
 // 确保在web浏览器完成身份验证后正确关闭
 WebBrowser.maybeCompleteAuthSession();
 
 // 添加重定向URI配置
-// const redirectUri = AuthSession.makeRedirectUri({
-//   scheme: 'nicenovel', // 替换为你的应用 scheme
-//   path: 'bookshelf',  // 可选，指定重定向路径
-// });
+const redirectUri = makeRedirectUri({
+  scheme: 'nicenovel',
+  path: 'login',
+});
 
 export default function Login() {
   const pathname = usePathname();// 获取当前路径
@@ -38,10 +39,12 @@ export default function Login() {
   // request: OAuth 请求对象
   // response: 授权响应结果
   // promptAsync: 触发授权流程的函数
+  console.log('redirectUri', redirectUri);
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
     androidClientId: "643989459317-9db0hp4bkr8i0ap0pfa4se9ah599i8ea.apps.googleusercontent.com",
     iosClientId: "643989459317-9db0hp4bkr8i0ap0pfa4se9ah599i8ea.apps.googleusercontent.com",
     webClientId: "643989459317-8m42ib4asihivfk4k73gk32l874kjna6.apps.googleusercontent.com",
+    redirectUri: redirectUri,
   });
 
   // useEffect 用于监听授权响应
