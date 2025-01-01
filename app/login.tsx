@@ -121,14 +121,19 @@ export default function Login() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-1 p-5 justify-center">
-        {/* <View className="w-64 h-64 self-center mb-8">
+      <View className="flex-1 p-4 justify-center">
+        <View className="w-32 h-32 self-center mb-8">
           <Image 
             source={require('../assets/images/icon.png')}
-            className="w-full h-full"
+            className="w-32 h-32"
             resizeMode="contain"
+            style={{
+              width: 128,
+              height: 128,
+            }}
           />
-        </View> */}
+        </View>
+        
         <Text className="text-2xl font-bold text-center mb-10">Nice Novel</Text>
         
         <TouchableOpacity 

@@ -151,7 +151,7 @@ export default function SubscriptionPlanDrawer({ onSubscriptionSuccess }: Subscr
   return (
     <>
       {/* 订阅计划 */}
-      <View className="p-4 flex-row flex-wrap justify-between gap-3">
+      <View className="flex-row flex-wrap justify-between gap-3">
         {subscriptionPlans.map((plan) => (
           <TouchableOpacity
             key={plan.id}

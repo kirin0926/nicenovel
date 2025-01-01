@@ -27,9 +27,9 @@ export default function RootLayout() {
             headerShadowVisible: false,
             headerTitleAlign: 'center',
             animation: 'slide_from_right',
-            contentStyle: {
-              flex: 1,
-            },
+            // contentStyle: {
+            //   flex: 1,
+            // },
           }}>
           <Stack.Screen
             name="(tabs)"
