@@ -25,7 +25,7 @@
     "rewrites": [
       {
         "source": "/(.*)",
-        "destination": "/$1"
+        "destination": "/index.html"
       }
     ],
     "buildCommand": "npx expo export -p web",
