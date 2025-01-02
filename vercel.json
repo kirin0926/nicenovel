@@ -24,14 +24,8 @@
     ],
     "rewrites": [
       {
-        "source": "/(.*)",
-        "destination": "/"
-      }
-    ],
-    "routes": [
-      {
-        "src": "/(.*)",
-        "dest": "/"
+        "source": "/((?!api/.*).*)",
+        "destination": "/index.html"
       }
     ]
   }
