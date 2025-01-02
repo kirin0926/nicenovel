@@ -13,16 +13,16 @@ import {
   Image
 } from 'react-native';
 import { router, usePathname } from 'expo-router';
+import { useEffect } from 'react';
 import { FontAwesome } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
 // import * as AuthSession from 'expo-auth-session';
 import * as Google from 'expo-auth-session/providers/google';
-import { useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
 // import * as AppleAuthentication from 'expo-auth-session/providers/apple';
 import { Analytics } from '@/services/analytics';
 import { makeRedirectUri } from 'expo-auth-session';
 import useStore from '@/store/useStore';
+import { api } from '@/services/api';
 
 // 确保在web浏览器完成身份验证后正确关闭
 WebBrowser.maybeCompleteAuthSession();
@@ -55,7 +55,6 @@ export default function Login() {
   // 如果成功，可以获取到 access token 进行后续操作
   useEffect(() => {
     if (response?.type === 'success') {
-      // console.log('response', response);
       const idToken = response.params?.id_token as string;
       signInWithSupabase(idToken);
     }
@@ -64,14 +63,11 @@ export default function Login() {
   // 使用 Supabase 进行 Google 登录
   const signInWithSupabase = async (token: string) => {
     try {
-      const { data, error } = await supabase.auth.signInWithIdToken({
-        provider: 'google',
-        token: token,
-      });
+      const { data, error } = await api.signInWithIdToken(token);
       if (error) {
         if (error.message.includes('Refresh Token Not Found')) {
           // 清除本地存储的认证信息
-          await supabase.auth.signOut();
+          await api.signOut();
           // 重新引导用户登录
           router.replace('/login');
         }
@@ -87,13 +83,7 @@ export default function Login() {
       
       if (router.canGoBack()) {
         router.back();
-        setTimeout(() => {
-          if (pathname === '/novel') {
-            router.setParams({ checkSubscription: 'true' });// 检查订阅状态
-          }
-        }, 100);
       }
-      console.log('data:', data);
     } catch (error) {
       console.error('Error signing in with Google:', error);
     }

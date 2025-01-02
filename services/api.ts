@@ -10,14 +10,7 @@ export const stripeKey = process.env.NODE_ENV === 'development'
 
 // supabase接口
 export const api = {
-  // 获取订阅计划
-  getSubscriptionPlans: async () => {
-    const { data, error } = await supabase
-    .from('stripe_prices')
-    .select('*');
-    
-    return { data, error };
-  },
+  
   // 获取小说章节
   getNovelChapter: async (novelId: string, chapterId: string) => {
     const { data, error } = await supabase
@@ -38,12 +31,22 @@ export const api = {
 
     return { data, error };
   },
+
+  
   // 获取首页小说列表
   getNovelList: async () => {
     const { data, error } = await supabase
     .from('novels')
     .select('*');
 
+    return { data, error };
+  },
+  // 获取订阅计划
+  getSubscriptionPlans: async () => {
+    const { data, error } = await supabase
+    .from('stripe_prices')
+    .select('*');
+    
     return { data, error };
   },
   // 获取用户订阅状态
@@ -61,10 +64,65 @@ export const api = {
       return { data: null, error: e };
     }
   },
+  // 使用id token登录
+  signInWithIdToken: async (idToken: string) => {
+    const { data, error } = await supabase.auth.signInWithIdToken({
+      provider: 'google',
+      token: idToken,
+    });
+    return { data, error };
+  },
   // 登出
   signOut: async () => {
     await supabase.auth.signOut();
-  }
+  },
+  // 检查session是否有效
+  checkSession: async () => {
+    try {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      // 检查是否有错误或session不存在
+      if (error || !session) {
+        return {
+          isValid: false,
+          session: null,
+          error: error || new Error('No session found')
+        };
+      }
+
+      // 检查access token是否存在且未过期
+      if (session.expires_at) {
+        const expiresAt = new Date(session.expires_at * 1000);
+        const now = new Date();
+        
+        if (expiresAt <= now) {
+          // Token已过期，尝试刷新
+          const { error: refreshError } = await supabase.auth.refreshSession();
+          if (refreshError) {
+            // 刷新失败，可能是refresh token已失效
+            return {
+              isValid: false,
+              session: null,
+              error: refreshError
+            };
+          }
+        }
+      }
+
+      return {
+        isValid: true,
+        session,
+        error: null
+      };
+    } catch (e) {
+      console.error('Session check error:', e);
+      return {
+        isValid: false,
+        session: null,
+        error: e
+      };
+    }
+  },
 };
 
 //后端接口

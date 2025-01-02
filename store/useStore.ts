@@ -47,7 +47,6 @@ const useStore = create<StoreState>()(
           if (error) throw error;
           
           if (data) {
-            // console.log('data', data);
             set({
               subscription: {
                 status: 'active',
@@ -55,7 +54,6 @@ const useStore = create<StoreState>()(
               },
             });
           } else {
-            // console.log('data', data);
             set({
               subscription: {
                 status: 'inactive',
