@@ -10,8 +10,7 @@ export default function Profile() {
   const logout = useStore((state) => state.logout);
   const checkSubscriptionStatus = useStore((state) => state.checkSubscriptionStatus);
 
-  useEffect(() => {
-    console.log('user:', user);
+  useEffect(() => {// 检查订阅状态
     if (user) {
       checkSubscriptionStatus(user.id);
     }

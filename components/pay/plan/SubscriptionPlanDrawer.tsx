@@ -1,5 +1,5 @@
 import { Text, View, TouchableOpacity, Pressable } from 'react-native';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { supabase } from '@/lib/supabase';
 import { api, backendapi } from '@/services/api';
@@ -33,6 +33,7 @@ export default function SubscriptionPlanDrawer({ onSubscriptionSuccess }: Subscr
   const elements = useElements();
   const router = useRouter();
   const setSubscription = useStore((state) => state.setSubscription);
+  const cardElementRef = useRef<any>(null);
 
   useEffect(() => {
     fetchSubscriptionPlans();
@@ -68,10 +69,10 @@ export default function SubscriptionPlanDrawer({ onSubscriptionSuccess }: Subscr
       console.log('Stripe has not been initialized');
       return;
     }
-    const cardElement = elements.getElement(CardElement);
-    if (!cardElement) {
-        console.error('CardElement has not been found.');
-        return;
+
+    if (!cardElementRef.current) {
+      console.error('CardElement has not been initialized.');
+      return;
     }
 
     try {
@@ -88,11 +89,11 @@ export default function SubscriptionPlanDrawer({ onSubscriptionSuccess }: Subscr
         data.clientSecret,
         {
           payment_method: {
-            card: elements.getElement(CardElement)!,
+            card: cardElementRef.current,
           },
         }
       );
-      console.log('paymentIntent:', paymentIntent);
+      // console.log('paymentIntent:', paymentIntent);
       if (stripeError) {
         console.log('Payment failed stripeError:', stripeError);
         return;
@@ -151,7 +152,7 @@ export default function SubscriptionPlanDrawer({ onSubscriptionSuccess }: Subscr
   return (
     <>
       {/* 订阅计划 */}
-      <View className="flex-row flex-wrap justify-between gap-3">
+      <View className="flex-row flex-wrap justify-between gap-3 p-4">
         {subscriptionPlans.map((plan) => (
           <TouchableOpacity
             key={plan.id}
@@ -202,6 +203,7 @@ export default function SubscriptionPlanDrawer({ onSubscriptionSuccess }: Subscr
             <View className="border border-gray-200 rounded-lg p-3">
               <Text className="text-base font-bold mb-2">Payment Method</Text>
               <CardElement
+                onReady={(element) => cardElementRef.current = element}
                 options={{
                   style: {
                     base: {

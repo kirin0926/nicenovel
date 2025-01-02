@@ -2,11 +2,11 @@ import { supabase } from '@/lib/supabase';
 
 export const backendUrl = process.env.NODE_ENV === 'development' 
   ? 'http://localhost:3000'  // 开发环境
-  : process.env.EXPO_PUBLIC_BACKEND_URL;  // 生产环境
+  : process.env.EXPO_PUBLIC_VERCEL_PRODUCTION_URL;  // 生产环境
 
 export const stripeKey = process.env.NODE_ENV === 'development' 
   ? 'pk_test_51PBXHTDISTrmdpg8Px0ZFxMz42kbz2rQg2uiwnRt6HgAhLJrGeIpKShrHuiRk1wQCHwyTQYZVZnvBZiRZ5uBwmo2001GnjOGoD'  // 开发环境
-  : process.env.EXPO_PUBLIC_STRIPE;  // 生产环境
+  : process.env.EXPO_PUBLIC_PRODUCTION_STRIPE_KEY;  // 生产环境
 
 // supabase接口
 export const api = {
@@ -48,16 +48,23 @@ export const api = {
   },
   // 获取用户订阅状态
   checkSubscriptionStatus: async (userId: string) => {
-    const { data, error } = await supabase
-      .from('subscriptions')
-      .select('*')
-      .eq('user_id', userId)// 用户id
-      .eq('status', 'active')// 状态
-      .gte('current_period_end', new Date().toISOString())// 结束时间
-      .single();// 单个
-  
-    return { data, error };
+    try {
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .select('id, user_id, status, current_period_end')
+        .eq('user_id', userId)
+        .maybeSingle();
+      
+      return { data, error };
+    } catch (e) {
+      console.error('Subscription check error:', e);
+      return { data: null, error: e };
+    }
   },
+  // 登出
+  signOut: async () => {
+    await supabase.auth.signOut();
+  }
 };
 
 //后端接口
@@ -66,7 +73,7 @@ export const backendapi = {
   createSubscription: async (plan: { id: string }) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       const response = await fetch(`${backendUrl}/create-subscription`, {
         method: 'POST',
         headers: {

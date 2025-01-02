@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'//持久化
 import { storage } from '@/lib/storage-adapter'
-import { supabase } from '@/lib/supabase'
+import { api } from '@/services/api'
 
 interface User {
   id: string;
@@ -42,24 +42,29 @@ const useStore = create<StoreState>()(
       checkSubscriptionStatus: async (userId) => {
         try {
           set({ isLoading: true });
-          const { data, error } = await supabase
-            .from('subscriptions')
-            .select('*')
-            .eq('user_id', userId)
-            .eq('status', 'active')
-            .gte('current_period_end', new Date().toISOString())
-            .single();
+          const { data, error } = await api.checkSubscriptionStatus(userId);
 
           if (error) throw error;
-
-          set({
-            subscription: {
-              status: data ? 'active' : 'inactive',
-              expiryDate: data?.current_period_end,
-            },
-          });
+          
+          if (data) {
+            // console.log('data', data);
+            set({
+              subscription: {
+                status: 'active',
+                expiryDate: data?.current_period_end,
+              },
+            });
+          } else {
+            // console.log('data', data);
+            set({
+              subscription: {
+                status: 'inactive',
+                expiryDate: undefined,
+              },
+            });
+          }
         } catch (error) {
-          console.error('Error checking subscription:', error);
+          console.log('Error checking subscription:', error);
           set({ subscription: { status: 'inactive' } });
         } finally {
           set({ isLoading: false });
@@ -68,10 +73,10 @@ const useStore = create<StoreState>()(
 
       logout: async () => {
         try {
-          await supabase.auth.signOut();
+          await api.signOut();
           set({ user: null, subscription: null });
         } catch (error) {
-          console.error('Error logging out:', error);
+          console.log('Error logging out:', error);
         }
       },
     }),
