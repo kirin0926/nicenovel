@@ -23,6 +23,15 @@
       }
     ],
     "rewrites": [
-      { "source": "/login", "destination": "/index.html" }
+      {
+        "source": "/(.*)",
+        "destination": "/"
+      }
+    ],
+    "routes": [
+      {
+        "src": "/(.*)",
+        "dest": "/"
+      }
     ]
   }
