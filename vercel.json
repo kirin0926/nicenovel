@@ -1,33 +1,14 @@
 {
-    "headers": [
-      {
-        "source": "/(.*)",
-        "headers": [
-          {
-            "key": "Cross-Origin-Embedder-Policy",
-            "value": "unsafe-none"
-          },
-          {
-            "key": "Cross-Origin-Opener-Policy",
-            "value": "same-origin-allow-popups"
-          },
-          {
-            "key": "Access-Control-Allow-Origin",
-            "value": "*"
-          },
-          {
-            "key": "Cross-Origin-Resource-Policy",
-            "value": "cross-origin"
-          }
-        ]
-      }
-    ],
+    "buildCommand": "npx expo export -p web",
+    "outputDirectory": "dist",
+    "devCommand":"expo",
+    "cleanUrls": true,
+    "framework": null,
     "rewrites": [
       {
         "source": "/(.*)",
         "destination": "/index.html"
       }
-    ],
-    "buildCommand": "npx expo export -p web",
-    "outputDirectory": "dist"
-  }
+    ]
+    
+}
