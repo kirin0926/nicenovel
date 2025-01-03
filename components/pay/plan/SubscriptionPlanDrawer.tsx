@@ -1,8 +1,10 @@
 import { Text, View, TouchableOpacity, Pressable } from 'react-native';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { supabase } from '@/lib/supabase';
 import { api, backendapi } from '@/services/api';
+import { useToast, Toast, ToastTitle, ToastDescription } from '@/components/ui/toast';
+
 import {
   Drawer,
   DrawerBackdrop,
@@ -34,12 +36,17 @@ export default function SubscriptionPlanDrawer({ onSubscriptionSuccess }: Subscr
   const router = useRouter();
   const setSubscription = useStore((state) => state.setSubscription);
   const cardElementRef = useRef<any>(null);
+  const [isThrottled, setIsThrottled] = useState(false);
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
+    // 获取订阅计划
     fetchSubscriptionPlans();
   }, []);
 
   useEffect(() => {
+    // 如果订阅计划不为空，且没有选择计划，则选择第一个计划
     if (subscriptionPlans.length > 0 && !selectedPlan) {
       setSelectedPlan(subscriptionPlans[0].id);
     }
@@ -56,7 +63,6 @@ export default function SubscriptionPlanDrawer({ onSubscriptionSuccess }: Subscr
         days: plan.interval_count,
         price: plan.unit_amount / 100,
       }));
-      // console.log('formattedPlans:', formattedPlans);
       setSubscriptionPlans(formattedPlans);
     } catch (error) {
       console.error('Error fetching subscription plans:', error);
@@ -81,6 +87,28 @@ export default function SubscriptionPlanDrawer({ onSubscriptionSuccess }: Subscr
       
       if (subscriptionError) {
         console.error('Subscription creation failed:', subscriptionError);
+        // 检查是否是已订阅的错误
+        if (subscriptionError.code === 'PGRST116') {
+          toast.show({
+            placement: "top",
+            render:({id})=>{
+              return (<Toast id={id} className="bg-green-500 text-white">
+                <ToastTitle>Subscription successful</ToastTitle>
+                <ToastDescription>You already have an active subscription</ToastDescription>
+              </Toast>)
+            }
+          });
+        } else {
+          toast.show({
+            placement: "top",
+            render:({id})=>{
+              return (<Toast id={id} className="bg-red-500 text-white">
+                <ToastTitle>Subscription failed</ToastTitle>
+                <ToastDescription>Subscription creation failed, please try again later</ToastDescription>
+              </Toast>)
+            }
+          });
+        }
         return;
       }
 
@@ -130,6 +158,15 @@ export default function SubscriptionPlanDrawer({ onSubscriptionSuccess }: Subscr
           
           onSubscriptionSuccess?.();// 订阅成功回调
           setShowDrawer(false);// 关闭弹出框
+          toast.show({
+            placement: 'top',
+            render:({id})=>{
+              return (<Toast id={id} className="bg-green-500 text-white">
+                <ToastTitle>Subscription successful</ToastTitle>
+                <ToastDescription>You are now a SVIP member</ToastDescription>
+              </Toast>)
+            }
+          });
         }
       }
     } catch (error) {
@@ -137,22 +174,37 @@ export default function SubscriptionPlanDrawer({ onSubscriptionSuccess }: Subscr
     }
   };
 
-  const handlePressSubscribe = async () => {
+  const handlePressSubscribe = useCallback(async () => {
+    if (isThrottled) return;
+    
+    setIsThrottled(true);
+    setTimeout(() => setIsThrottled(false), 2000); // 2秒内不能重复点击
+
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session) {
-      // Redirect to login if user is not authenticated
       router.push('/login');
       return;
     }
 
     setShowDrawer(true);
-  };
+  }, [isThrottled, router]);
+
+  const handleSubscribeClick = useCallback(async () => {
+    if (isSubscribing) return;
+    
+    setIsSubscribing(true);
+    const plan = subscriptionPlans.find(p => p.id === selectedPlan);
+    if (plan) {
+      await handleSubscribe(plan);
+    }
+    setTimeout(() => setIsSubscribing(false), 2000);
+  }, [isSubscribing, selectedPlan, subscriptionPlans, handleSubscribe]);
 
   return (
     <>
       {/* 订阅计划 */}
-      <View className="flex-row flex-wrap justify-between gap-3 p-4">
+      <View className="flex-row flex-wrap justify-between gap-3 p-2">
         {subscriptionPlans.map((plan) => (
           <TouchableOpacity
             key={plan.id}
@@ -162,7 +214,7 @@ export default function SubscriptionPlanDrawer({ onSubscriptionSuccess }: Subscr
             activeOpacity={0.9}
             onPress={() => setSelectedPlan(plan.id)}>
             <View className="p-4 items-center">
-              <Text className="text-base text-center mb-2 text-[#FF629A]">Read all SVIP stories</Text>
+              <Text className="text-base text-center text-[#FF629A]">Read all SVIP stories</Text>
               <Text className="text-2xl font-bold text-black mb-1">${plan.price}</Text>
               <Text className={`text-base px-3 py-1 rounded ${
                 selectedPlan === plan.id 
@@ -176,11 +228,12 @@ export default function SubscriptionPlanDrawer({ onSubscriptionSuccess }: Subscr
 
       {/* 添加订阅按钮 */}
       <Pressable 
-        className="bg-[#FF629A] p-4 rounded-lg mx-4 my-5"
+        className={`bg-[#FF629A] p-4 rounded-lg mx-4 my-5 ${isThrottled ? 'opacity-50' : ''}`}
         onPress={handlePressSubscribe}
+        disabled={isThrottled}
       >
         <Text className="text-white text-center text-base font-bold">
-          SVIP Member Recharge
+          {isThrottled ? 'Processing...' : 'SVIP Member Recharge'}
         </Text>
       </Pressable>
 
@@ -192,7 +245,7 @@ export default function SubscriptionPlanDrawer({ onSubscriptionSuccess }: Subscr
         anchor="bottom">
         <DrawerBackdrop />
         <DrawerContent>
-          <DrawerHeader>
+          <DrawerHeader className="flex flex-row justify-end">
             <DrawerCloseButton>
               <View>
                 <Text>Cancel</Text>
@@ -221,12 +274,13 @@ export default function SubscriptionPlanDrawer({ onSubscriptionSuccess }: Subscr
               />
             </View>
             <TouchableOpacity 
-              className="bg-red-500 mt-6 p-4 rounded-md" 
-              onPress={() => {
-                const plan = subscriptionPlans.find(p => p.id === selectedPlan);
-                if (plan) handleSubscribe(plan);
-              }}>
-              <Text className="text-white text-center font-bold">SVIP Member Recharge</Text>
+              className={`bg-red-500 mt-6 p-4 rounded-md ${isSubscribing ? 'opacity-50' : ''}`}
+              onPress={handleSubscribeClick}
+              disabled={isSubscribing}
+            >
+              <Text className="text-white text-center font-bold">
+                {isSubscribing ? 'Processing...' : 'SVIP Member Recharge'}
+              </Text>
             </TouchableOpacity>
           </DrawerBody>
           <DrawerFooter />

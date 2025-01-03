@@ -132,6 +132,20 @@ export const backendapi = {
     try {
       const { data: { user } } = await supabase.auth.getUser();
 
+      if (!user?.id) {
+        return { error: new Error('User not found') };
+      }
+      
+      const { data: existingSub, error: subError } = await api.checkSubscriptionStatus(user.id);
+      
+      // 如果用户已经订阅，则返回错误
+      if (existingSub) {
+        return { error: {
+          message: 'User already has an active subscription',
+          code: 'PGRST116'
+        }};
+      }
+      // 创建订阅
       const response = await fetch(`${backendUrl}/create-subscription`, {
         method: 'POST',
         headers: {
