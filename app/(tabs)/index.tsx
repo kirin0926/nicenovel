@@ -76,7 +76,9 @@ export default function Home() {
         });
       }}>
       <Image 
-        source={{ uri: item.cover }} 
+        source={{ uri: item.cover }}
+        defaultSource={require('@/assets/images/icon.png')}
+        loadingIndicatorSource={require('@/assets/images/icon.png')}
         className="rounded-t-lg"
         style={{ width: COLUMN_WIDTH, height: COLUMN_WIDTH * 1.5 }}
       />
