@@ -1,4 +1,4 @@
-import { View,Text,ScrollView,Pressable,SafeAreaView,useWindowDimensions} from 'react-native';
+import { View,Text,ScrollView,Pressable,SafeAreaView,useWindowDimensions,TouchableOpacity} from 'react-native';
 import { useEffect, useState } from 'react';
 import RenderHtml from 'react-native-render-html';
 import { useLocalSearchParams, router } from 'expo-router';
@@ -29,6 +29,7 @@ export default function ReadScreen() {
   // 使用 Zustand store 的订阅状态
   const subscription = useStore((state) => state.subscription);
   const isSubscribed = subscription?.status === 'active';
+  const user = useStore((state) => state.user);
 
   useEffect(() => {
     // 获取当前章节
@@ -68,6 +69,7 @@ export default function ReadScreen() {
           //   .limit(1)
           //   .single();
           // setNextChapter(nextData);
+          console.log(user);
         }
       } catch (error) {
         console.error('Error fetching chapters:', error);
@@ -185,7 +187,8 @@ export default function ReadScreen() {
           }}
         />
         
-        {!isSubscribed && (
+        {/* 未订阅 */}
+        {/* {!isSubscribed && (
           <View>
             <View className="flex-row items-center justify-center px-4 my-5">
               <View className="flex-1 h-[1px] border border-dashed border-gray-300 mx-2.5" />
@@ -196,6 +199,31 @@ export default function ReadScreen() {
             </View>
             
             <SubscriptionPlanDrawer />
+          </View>
+        )} */}
+
+        {/* 未登录 */}
+        {!user && (
+          <View>
+            <View className="flex-row items-center justify-center px-4 my-5">
+              <View className="flex-1 h-[1px] border border-dashed border-gray-300 mx-2.5" />
+              <Text className="text-base text-red-500 font-medium">
+                Login to Continue Reading free Full Novel
+              </Text>
+              <View className="flex-1 h-[1px] border border-dashed border-gray-300 mx-2.5" />
+            </View>
+            <View className="flex-row items-center justify-center">
+              <TouchableOpacity
+                className="bg-[#FF629A] px-10 py-4 rounded-lg bt-5 mb-10"
+                onPress={() => {
+                  Analytics.trackEvent('Login Button Click', {
+                    source: 'profile_page'
+                  });
+                  router.push('/login');
+                }}>
+                <Text className="text-white text-sm font-bold">Login/Register</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
       </ScrollView>

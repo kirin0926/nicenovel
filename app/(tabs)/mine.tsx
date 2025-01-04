@@ -21,7 +21,7 @@ export default function Profile() {
       <View className="flex-1 bg-[#f5f5f5]">
         <View className="flex-1 justify-center items-center p-2.5">
           <TouchableOpacity
-            className="bg-[#FF629A] px-10 py-4 rounded-lg mt-5"
+            className="bg-[#FF629A] px-10 py-4 rounded-lg"
             onPress={() => {
               Analytics.trackEvent('Login Button Click', {
                 source: 'profile_page'
