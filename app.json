@@ -22,7 +22,15 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png",
+      "head": {
+        "meta": [
+          {
+            "name": "google-adsense-account",
+            "content": "ca-pub-7897104007345492"
+          }
+        ]
+      }
     },
     "plugins": [
       "expo-router",

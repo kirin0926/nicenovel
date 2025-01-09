@@ -188,7 +188,7 @@ export default function ReadScreen() {
         />
         
         {/* 未订阅 */}
-        {!isSubscribed && (
+        {/* {!isSubscribed && (
           <View>
             <View className="flex-row items-center justify-center px-4 my-5">
               <View className="flex-1 h-[1px] border border-dashed border-gray-300 mx-2.5" />
@@ -200,10 +200,10 @@ export default function ReadScreen() {
             
             <SubscriptionPlanDrawer />
           </View>
-        )}
+        )} */}
 
         {/* 未登录 */}
-        {/* {!user && (
+        {!user && (
           <View>
             <View className="flex-row items-center justify-center px-4 my-5">
               <View className="flex-1 h-[1px] border border-dashed border-gray-300 mx-2.5" />
@@ -225,7 +225,7 @@ export default function ReadScreen() {
               </TouchableOpacity>
             </View>
           </View>
-        )} */}
+        )}
       </ScrollView>
       
       <View className={`${!showControls && 'opacity-0 h-0'}`}>

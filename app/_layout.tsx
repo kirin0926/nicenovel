@@ -6,6 +6,7 @@ import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { stripeKey } from '@/services/api';
 import { initializeAnalytics } from '@/services/analytics';
+import { GoogleAdsense } from '@/components/GoogleAdsense';
 
 initializeAnalytics();
 export const stripePromise = loadStripe(stripeKey!);
@@ -14,6 +15,7 @@ export default function RootLayout() {
   return (
     <Elements stripe={stripePromise}>
       <GluestackUIProvider mode="light">
+        <GoogleAdsense />
         <StatusBar style="dark"/>
         <Stack
           screenOptions={{
@@ -48,6 +50,12 @@ export default function RootLayout() {
           />
           <Stack.Screen
             name="login"
+            options={{
+              headerShown: true,
+            }}
+          />
+          <Stack.Screen
+            name="booksearch"
             options={{
               headerShown: true,
             }}

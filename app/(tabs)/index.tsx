@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Text, View, Image, TouchableOpacity, FlatList, Dimensions, ActivityIndicator } from 'react-native';
+import { Text, View, Image, TouchableOpacity, FlatList, Dimensions, ActivityIndicator, TextInput } from 'react-native';
 import { router } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
@@ -102,17 +102,38 @@ export default function Home() {
           <Text>loading...</Text>
         </View>
       ) : (
-        <FlatList
-          data={novels}
-          renderItem={renderNovelItem}
-          keyExtractor={(item) => item.id}
-          numColumns={2}
-          className="p-2"
-          columnWrapperStyle={{ justifyContent: 'space-between' }}
-          onEndReached={loadMore}
-          onEndReachedThreshold={0.5}
-          ListFooterComponent={renderFooter}
-        />
+        <>
+          {/* search bar */}
+          <View className="m-2 mt-3 mb-3 hidden">
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => router.push('/booksearch')}
+            >
+              <View className="flex-row items-center bg-white rounded-lg p-2">
+                <FontAwesome name="search" size={16} color="#FF629A" />
+                <TextInput
+                  placeholder="search for novels"
+                  placeholderTextColor="#666"
+                  className="flex-1 p-2"
+                  onChangeText={(text) => console.log(text)}
+                  editable={false}
+                />
+              </View>
+            </TouchableOpacity>
+          </View>
+          {/* novel list */}
+          <FlatList
+            data={novels}
+            renderItem={renderNovelItem}
+            keyExtractor={(item) => item.id}
+            numColumns={2}
+            className="p-2"
+            columnWrapperStyle={{ justifyContent: 'space-between' }}
+            onEndReached={loadMore}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={renderFooter}
+          />
+          </>
       )}
     </View>
   );
